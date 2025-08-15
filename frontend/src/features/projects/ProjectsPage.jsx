@@ -71,7 +71,7 @@ export default function ProjectsPage() {
   const scaffold = async (id) => {
     try {
       toast.loading("Generating plan...", { id: `scaffold-${id}` });
-      const p = await ProjectsAPI.scaffold(id);
+      const p = await ProjectsAPI.scaffold(id, provider);
       setProjects((prev) => prev.map((x) => (x.id === id ? p : x)));
       setSelected(p.id === selected?.id ? p : selected);
       toast.success("Plan generated", { id: `scaffold-${id}` });
