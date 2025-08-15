@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Badge } from "../../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-mport { Skeleton } from "../../components/ui/skeleton";
+import { Skeleton } from "../../components/ui/skeleton";
 import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
 import { Calendar } from "../../components/ui/calendar";
