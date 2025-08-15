@@ -122,7 +122,16 @@ export default function ProjectsPage() {
                   <CalendarIcon size={14} /> Ready in seconds
                 </div>
                 <div className="flex items-center gap-2">
-                  <ProviderSelect value={provider} onChange={setProvider} />
+                  <Select value={provider} onValueChange={setProvider}>
+                    <SelectTrigger className="w-[160px] rounded-full">
+                      <SelectValue placeholder="Provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">Auto</SelectItem>
+                      <SelectItem value="claude">Claude</SelectItem>
+                      <SelectItem value="gpt">GPT</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Button onClick={createProject} disabled={creating} className="rounded-full bg-slate-900 hover:bg-slate-800">
                     <Plus size={16} className="mr-2" />Create
                   </Button>
