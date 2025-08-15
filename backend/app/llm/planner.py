@@ -1,11 +1,6 @@
 import json
 from typing import Optional
-from emergentintegrations.exceptions import (
-    AuthenticationError,
-    RateLimitError,
-    InvalidRequestError,
-    LLMAPIError,
-)
+# Note: Catch generic Exception to avoid tight coupling to SDK-specific exceptions
 from .client import get_llm_client
 from ..projects.models import Plan
 
