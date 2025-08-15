@@ -234,9 +234,9 @@ export default function TemplatesPage() {
 
 function recommendedModels(provider) {
   const maps = {
-    claude: ["claude-3-5-sonnet", "claude-3-5-haiku"],
-    gpt: ["gpt-4.1", "gpt-4o-mini"],
-    auto: ["claude-3-5-sonnet", "gpt-4.1"],
+    claude: ["claude-4-sonnet"],
+    gpt: ["gpt-5"],
+    auto: ["claude-4-sonnet", "gpt-5"],
   };
   return maps[provider] || maps.auto;
 }
