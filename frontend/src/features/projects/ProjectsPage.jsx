@@ -280,17 +280,17 @@ function PlanList({ title, items }) {
     </div>
   );
 
-const ProviderSelect = ({ value, onChange }) => (
-  <Select value={value} onValueChange={onChange}>
-    <SelectTrigger className="w-[160px] rounded-full">
-      <SelectValue placeholder="Provider" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="auto">Auto</SelectItem>
-      <SelectItem value="claude">Claude</SelectItem>
-      <SelectItem value="gpt">GPT</SelectItem>
-    </SelectContent>
-  </Select>
-);
-
+function ProviderSelect({ value, onChange }) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-[160px] rounded-full">
+        <SelectValue placeholder="Provider" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="auto">Auto</SelectItem>
+        <SelectItem value="claude">Claude</SelectItem>
+        <SelectItem value="gpt">GPT</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 }
