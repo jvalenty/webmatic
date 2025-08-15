@@ -183,8 +183,7 @@ export default function TemplatesPage() {
 function TemplatePreview({ id, load, data, activeId }) {
   useEffect(() => {
     if (!data || activeId !== id) load(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, activeId]);
+  }, [id, activeId, data, load]);
 
   if (!data || activeId !== id) {
     return (
