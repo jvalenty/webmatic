@@ -110,29 +110,43 @@ class WebmaticAPITester:
             self.log_test("Get Project", False, f"- Error: {str(e)}")
         return False
 
-    def test_scaffold_project(self):
-        """Test project scaffolding/plan generation"""
+    def test_scaffold_project_with_provider(self, provider="auto"):
+        """Test project scaffolding/plan generation with specific provider"""
         if not self.created_project_id:
-            self.log_test("Scaffold Project", False, "- No project ID available")
+            self.log_test(f"Scaffold Project ({provider})", False, "- No project ID available")
             return False
         
         try:
-            response = requests.post(f"{self.base_url}/projects/{self.created_project_id}/scaffold", timeout=15)
+            payload = {"provider": provider}
+            response = requests.post(
+                f"{self.base_url}/projects/{self.created_project_id}/scaffold", 
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30  # Increased timeout for LLM calls
+            )
             if response.status_code == 200:
                 data = response.json()
                 if data.get("status") == "planned" and data.get("plan"):
                     plan = data["plan"]
-                    has_auth = any("Auth module placeholder" in item for item in plan.get("backend", []))
-                    has_stripe = any("Stripe integration placeholder" in item for item in plan.get("backend", []))
-                    self.log_test("Scaffold Project", True, f"- Auth: {has_auth}, Stripe: {has_stripe}")
+                    frontend_count = len(plan.get("frontend", []))
+                    backend_count = len(plan.get("backend", []))
+                    database_count = len(plan.get("database", []))
+                    has_auth = any("auth" in item.lower() for item in plan.get("backend", []))
+                    has_stripe = any("stripe" in item.lower() for item in plan.get("backend", []))
+                    self.log_test(f"Scaffold Project ({provider})", True, 
+                                f"- Frontend: {frontend_count}, Backend: {backend_count}, DB: {database_count}, Auth: {has_auth}, Stripe: {has_stripe}")
                     return True
                 else:
-                    self.log_test("Scaffold Project", False, f"- Invalid plan: {data.get('status')}")
+                    self.log_test(f"Scaffold Project ({provider})", False, f"- Invalid plan: {data.get('status')}")
             else:
-                self.log_test("Scaffold Project", False, f"- Status: {response.status_code}")
+                self.log_test(f"Scaffold Project ({provider})", False, f"- Status: {response.status_code}, Body: {response.text}")
         except Exception as e:
-            self.log_test("Scaffold Project", False, f"- Error: {str(e)}")
+            self.log_test(f"Scaffold Project ({provider})", False, f"- Error: {str(e)}")
         return False
+
+    def test_scaffold_project(self):
+        """Test project scaffolding with default provider"""
+        return self.test_scaffold_project_with_provider("auto")
 
     def run_all_tests(self):
         """Run all backend tests"""
