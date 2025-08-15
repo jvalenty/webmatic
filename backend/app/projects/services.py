@@ -58,12 +58,11 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
     )
 
 
-async def compute_plan(description: str, provider: Optional[str]) -> Tuple[Plan, Dict[str, Any]]:
-    """Return (plan, meta) where meta includes mode: ai|stub, provider, error (optional)."""
+async def compute_plan(description: str, provider: Optional[str], model: Optional[str]) -> Tuple[Plan, Dict[str, Any]]:
+    """Return (plan, meta) where meta includes mode: ai|stub, provider, model, error (optional)."""
     try:
-        plan = await plan_from_llm(description, provider)
-        return plan, {"mode": "ai", "provider": (provider or "auto")}
+        plan = await plan_from_llm(description, provider, model)
+        return plan, {"mode": "ai", "provider": (provider or "auto"), "model": model}
     except Exception as e:
-        # fallback silently to stub to ensure UX continuity
         plan = await compute_stub_plan(description)
-        return plan, {"mode": "stub", "provider": (provider or "auto"), "error": str(e)}
+        return plan, {"mode": "stub", "provider": (provider or "auto"), "model": model, "error": str(e)}

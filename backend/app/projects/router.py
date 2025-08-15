@@ -11,6 +11,7 @@ router = APIRouter()
 
 class ScaffoldRequest(BaseModel):
   provider: Optional[str] = "auto"  # "claude" | "gpt" | "auto"
+  model: Optional[str] = None
 
 @router.post("/projects", response_model=Project)
 async def create_project(payload: ProjectCreate):
@@ -41,6 +42,7 @@ async def list_runs(project_id: str) -> List[Dict[str, Any]]:
             "id": d.get("_id"),
             "project_id": d.get("project_id"),
             "provider": d.get("provider"),
+            "model": d.get("model"),
             "mode": d.get("mode"),
             "status": d.get("status"),
             "error": d.get("error"),
@@ -56,9 +58,10 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
         raise HTTPException(status_code=404, detail="Project not found")
 
     provider = (payload.provider if payload else "auto") if payload else "auto"
+    model = payload.model if payload else None
     prj = doc_to_project(doc)
 
-    plan, meta = await compute_plan(prj.description, provider)
+    plan, meta = await compute_plan(prj.description, provider, model)
     prj.plan = plan
     prj.status = "planned"
     prj.updated_at = datetime.utcnow()
@@ -77,6 +80,7 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
         "_id": str(uuid.uuid4()),
         "project_id": project_id,
         "provider": meta.get("provider"),
+        "model": meta.get("model"),
         "mode": meta.get("mode"),
         "status": "success",
         "error": meta.get("error"),

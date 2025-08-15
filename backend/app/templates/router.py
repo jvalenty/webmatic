@@ -142,6 +142,7 @@ class CreateFromTemplatePayloadDict(BaseModel):
     name: Optional[str] = None
     overrides: Optional[Dict[str, Any]] = None
     provider: Optional[str] = "auto"
+    model: Optional[str] = None
 
 
 @router.post("/projects/from-template", response_model=Project)
@@ -168,8 +169,8 @@ async def create_project_from_template(payload: CreateFromTemplatePayloadDict):
     doc["_id"] = project.id
     await db.projects.insert_one(doc)
 
-    # Compute plan using provider
-    plan, meta = await compute_plan(project.description, payload.provider)
+    # Compute plan using provider and model
+    plan, meta = await compute_plan(project.description, payload.provider, payload.model)
 
     # Update project with plan
     await db.projects.update_one(
@@ -182,6 +183,7 @@ async def create_project_from_template(payload: CreateFromTemplatePayloadDict):
         "_id": str(uuid.uuid4()),
         "project_id": project.id,
         "provider": meta.get("provider"),
+        "model": meta.get("model"),
         "mode": meta.get("mode"),
         "status": "success",
         "error": meta.get("error"),
