@@ -55,7 +55,10 @@ async def plan_from_llm(description: str, provider: Optional[str] = "auto", mode
             backend=list(map(str, data.get("backend", []))),
             database=list(map(str, data.get("database", []))),
         )
-    except (AuthenticationError, RateLimitError, InvalidRequestError, LLMAPIError) as e:
-        raise RuntimeError(f"LLM error: {e}")
+    except Exception as e:
+        # Catch any LLM-related errors (auth, rate limit, invalid request, etc.)
+        if "json" not in str(e).lower():  # Avoid catching JSON decode errors here
+            raise RuntimeError(f"LLM error: {e}")
+        raise  # Re-raise if it might be a JSON error
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Invalid JSON from LLM: {e}")
