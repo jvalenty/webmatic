@@ -47,8 +47,8 @@ class WebmaticAPITester:
     def test_create_project(self):
         """Test project creation"""
         payload = {
-            "name": "Test CRM with Auth",
-            "description": "A comprehensive CRM system with user authentication and Stripe payment integration"
+            "name": "AI Planner Test",
+            "description": "CRM with users, auth and Stripe"
         }
         try:
             response = requests.post(
