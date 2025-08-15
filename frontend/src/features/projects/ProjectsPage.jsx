@@ -115,13 +115,16 @@ export default function ProjectsPage() {
                 <label className="text-sm font-medium">Describe your app</label>
                 <Textarea rows={6} placeholder="Describe features, auth, payments, etc." value={description} onChange={(e) => setDescription(e.target.value)} />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <CalendarIcon size={14} /> Ready in seconds
                 </div>
-                <Button onClick={createProject} disabled={creating} className="rounded-full bg-slate-900 hover:bg-slate-800">
-                  <Plus size={16} className="mr-2" />Create
-                </Button>
+                <div className="flex items-center gap-2">
+                  <ProviderSelect value={provider} onChange={setProvider} />
+                  <Button onClick={createProject} disabled={creating} className="rounded-full bg-slate-900 hover:bg-slate-800">
+                    <Plus size={16} className="mr-2" />Create
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
