@@ -1,9 +1,9 @@
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 import logging
-from .app.core.config import CORS_ORIGINS, DB_NAME
-from .app.core.db import close_db_client, db
-from .app.projects.router import router as projects_router
+from app.core.config import CORS_ORIGINS, DB_NAME
+from app.core.db import close_db_client, db
+from app.projects.router import router as projects_router
 
 # FastAPI app and /api router
 app = FastAPI()
