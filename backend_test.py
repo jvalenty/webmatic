@@ -13,7 +13,7 @@ import os
 class WebmaticAPITester:
     def __init__(self):
         # Use the public URL from frontend/.env
-        self.base_url = "https://sitecraft-11.preview.emergentagent.com/api"
+        self.base_url = "https://ee7cc612-b2b8-4860-bf8a-5bfbc783a96c.preview.emergentagent.com/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.created_project_id = None
