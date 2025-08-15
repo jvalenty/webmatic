@@ -21,6 +21,12 @@ const StatusBadge = ({ status }) => {
   return <Badge className={`${color} text-white`}>{status}</Badge>;
 };
 
+const getModelsForProvider = (prov) => {
+  if (prov === "claude") return ["claude-4-sonnet"];
+  if (prov === "gpt") return ["gpt-5"];
+  return ["claude-4-sonnet", "gpt-5"]; // auto
+};
+
 export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -29,11 +35,18 @@ export default function ProjectsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [provider, setProvider] = useState("auto");
+  const [model, setModel] = useState("claude-4-sonnet");
   const [runs, setRuns] = useState([]);
   const [runsLoading, setRunsLoading] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [templateNames, setTemplateNames] = useState({});
+
+  useEffect(() => {
+    // Adjust model when provider changes
+    const allowed = getModelsForProvider(provider);
+    if (!allowed.includes(model)) setModel(allowed[0]);
+  }, [provider]);
 
   const load = async () => {
     try {
@@ -108,7 +121,7 @@ export default function ProjectsPage() {
   const scaffold = async (id) => {
     try {
       toast.loading("Generating plan...", { id: `scaffold-${id}` });
-      const p = await ProjectsAPI.scaffold(id, provider);
+      const p = await ProjectsAPI.scaffold(id, provider, model);
       setProjects((prev) => prev.map((x) => (x.id === id ? p : x)));
       setSelected(p.id === selected?.id ? p : selected);
       await loadRuns(id);
@@ -123,7 +136,7 @@ export default function ProjectsPage() {
     try {
       const projName = templateNames[tpl.id] || tpl.name;
       toast.loading("Creating from template...", { id: `tpl-${tpl.id}` });
-      const p = await TemplatesAPI.createFromTemplate({ template_id: tpl.id, name: projName, provider });
+      const p = await TemplatesAPI.createFromTemplate({ template_id: tpl.id, name: projName, provider, model });
       setProjects((prev) => [p, ...prev]);
       setSelected(p);
       await loadRuns(p.id);
@@ -183,6 +196,16 @@ export default function ProjectsPage() {
                       <SelectItem value="auto">Auto</SelectItem>
                       <SelectItem value="claude">Claude</SelectItem>
                       <SelectItem value="gpt">GPT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={model} onValueChange={setModel}>
+                    <SelectTrigger className="w-[200px] rounded-full">
+                      <SelectValue placeholder="Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getModelsForProvider(provider).map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <Button onClick={createProject} disabled={creating} className="rounded-full bg-slate-900 hover:bg-slate-800">

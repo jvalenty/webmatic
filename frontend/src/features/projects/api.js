@@ -27,8 +27,10 @@ export const ProjectsAPI = {
     const { data } = await api.get(`/projects/${id}`);
     return data;
   },
-  async scaffold(id, provider) {
-    const { data } = await api.post(`/projects/${id}/scaffold`, { provider });
+  async scaffold(id, provider, model) {
+    const body = { provider };
+    if (model && model.trim()) body.model = model.trim();
+    const { data } = await api.post(`/projects/${id}/scaffold`, body);
     return data;
   },
   async runs(id) {
