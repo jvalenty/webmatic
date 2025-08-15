@@ -3,13 +3,16 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import uuid
 from pydantic import BaseModel
+import logging
 
 from ..core.db import db
 from .models import TemplateManifest
 from ..projects.models import Project
 from ..projects.services import compute_plan, doc_to_project
+from ..llm.constants import is_allowed_model, ALLOWED_MODELS
 
 router = APIRouter()
+logger = logging.getLogger("webmatic")
 
 
 async def _seed_templates_if_needed():
@@ -151,6 +154,10 @@ async def create_project_from_template(payload: CreateFromTemplatePayloadDict):
     t = await db.templates.find_one({"_id": payload.template_id})
     if not t:
         raise HTTPException(status_code=404, detail="Template not found")
+
+    if payload.model and not is_allowed_model(payload.model):
+        logger.warning(f"Rejected unsupported model '{payload.model}'. Allowed: {sorted(ALLOWED_MODELS)}")
+        raise HTTPException(status_code=400, detail=f"Unsupported model. Allowed: {sorted(ALLOWED_MODELS)}")
 
     name = payload.name or t.get("name")
     # Compose description for planner: template desc + integrations + entities + overrides

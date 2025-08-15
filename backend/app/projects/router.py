@@ -3,11 +3,14 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel
 import uuid
+import logging
 from ..core.db import db
 from .models import Project, ProjectCreate
 from .services import compute_plan, doc_to_project
+from ..llm.constants import is_allowed_model, ALLOWED_MODELS
 
 router = APIRouter()
+logger = logging.getLogger("webmatic")
 
 class ScaffoldRequest(BaseModel):
   provider: Optional[str] = "auto"  # "claude" | "gpt" | "auto"
@@ -59,6 +62,11 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
 
     provider = (payload.provider if payload else "auto") if payload else "auto"
     model = payload.model if payload else None
+
+    if model and not is_allowed_model(model):
+        logger.warning(f"Rejected unsupported model '{model}'. Allowed: {sorted(ALLOWED_MODELS)}")
+        raise HTTPException(status_code=400, detail=f"Unsupported model. Allowed: {sorted(ALLOWED_MODELS)}")
+
     prj = doc_to_project(doc)
 
     plan, meta = await compute_plan(prj.description, provider, model)
