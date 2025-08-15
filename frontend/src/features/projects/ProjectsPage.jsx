@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ProjectsAPI } from "./api";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -12,7 +12,6 @@ import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
 import { Calendar } from "../../components/ui/calendar";
 import { Calendar as CalendarIcon, Rocket, Plus, RefreshCw } from "lucide-react";
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 
 const StatusBadge = ({ status }) => {
@@ -45,7 +44,6 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     load();
-    // ping health silently for diagnostics
     ProjectsAPI.health().catch(() => {});
   }, []);
 
@@ -288,4 +286,4 @@ function PlanList({ title, items }) {
       </div>
     </div>
   );
-
+}
