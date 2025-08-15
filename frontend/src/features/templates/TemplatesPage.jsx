@@ -10,16 +10,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
-import { Eye, Rocket } from "lucide-react";
+import { Eye, Rocket, Plus, Trash } from "lucide-react";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [provider, setProvider] = useState("auto");
+  const [model, setModel] = useState("");
   const [nameById, setNameById] = useState({});
   const [previewId, setPreviewId] = useState(null);
   const [preview, setPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [overridesDraftById, setOverridesDraftById] = useState({}); // id -> [{k, v}]
   const navigate = useNavigate();
 
   const loadTemplates = async () => {
@@ -42,6 +44,7 @@ export default function TemplatesPage() {
       setPreviewId(id);
       const detail = await TemplatesAPI.get(id);
       setPreview(detail);
+      setOverridesDraftById((prev) => prev[id] ? prev : { ...prev, [id]: [] });
     } catch (e) {
       console.error(e);
       toast.error("Failed to load template");
@@ -50,14 +53,34 @@ export default function TemplatesPage() {
     }
   };
 
-  const createFromTemplate = async (tpl) => {
+  const rowsFor = (id) => overridesDraftById[id] || [];
+  const addRow = (id) => setOverridesDraftById((prev) => ({ ...prev, [id]: [...(prev[id] || []), { k: "", v: "" }] }));
+  const updateRow = (id, index, field, value) => setOverridesDraftById((prev) => {
+    const next = [...(prev[id] || [])];
+    next[index] = { ...next[index], [field]: value };
+    return { ...prev, [id]: next };
+  });
+  const removeRow = (id, index) => setOverridesDraftById((prev) => {
+    const next = [...(prev[id] || [])];
+    next.splice(index, 1);
+    return { ...prev, [id]: next };
+  });
+
+  const overridesObject = (id) => {
+    const rows = rowsFor(id);
+    const obj = {};
+    rows.forEach(({ k, v }) => {
+      if (k && k.trim()) obj[k.trim()] = v;
+    });
+    return obj;
+  };
+
+  const createFromTemplate = async (tpl, withOverrides = false) => {
     try {
+      const projName = nameById[tpl.id] || tpl.name;
+      const overrides = withOverrides ? overridesObject(tpl.id) : undefined;
       toast.loading("Creating from template...", { id: `tpl-${tpl.id}` });
-      const p = await TemplatesAPI.createFromTemplate({
-        template_id: tpl.id,
-        name: nameById[tpl.id] || tpl.name,
-        provider,
-      });
+      const p = await TemplatesAPI.createFromTemplate({ template_id: tpl.id, name: projName, provider, model, overrides });
       toast.success("Project created", { id: `tpl-${tpl.id}` });
       navigate("/");
     } catch (e) {
@@ -92,6 +115,7 @@ export default function TemplatesPage() {
                 <SelectItem value="gpt">GPT</SelectItem>
               </SelectContent>
             </Select>
+            <Input placeholder="Optional model (e.g., claude-3-5-sonnet)" value={model} onChange={(e) => setModel(e.target.value)} />
             <Link to="/">
               <Button variant="secondary" className="rounded-full">Back to Projects</Button>
             </Link>
@@ -154,7 +178,7 @@ export default function TemplatesPage() {
                             ))}
                           </div>
                         ) : (
-                          <TemplatePreview id={tpl.id} load={openPreview} data={preview} activeId={previewId} />
+                          <TemplatePreview id={tpl.id} load={openPreview} data={preview} activeId={previewId} rowsFor={rowsFor} addRow={addRow} updateRow={updateRow} removeRow={removeRow} onCreate={() => createFromTemplate(tpl, true)} />
                         )}
                       </DialogContent>
                     </Dialog>
@@ -164,7 +188,7 @@ export default function TemplatesPage() {
                       value={nameById[tpl.id] || ""}
                       onChange={(e) => setNameById((prev) => ({ ...prev, [tpl.id]: e.target.value }))}
                     />
-                    <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl)}>
+                    <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl, false)}>
                       <Rocket size={14} className="mr-2" />Create
                     </Button>
                   </div>
@@ -180,94 +204,122 @@ export default function TemplatesPage() {
   );
 }
 
-function TemplatePreview({ id, load, data, activeId }) {
+function TemplatePreview({ id, load, data, activeId, rowsFor, addRow, updateRow, removeRow, onCreate }) {
   useEffect(() => {
     if (!data || activeId !== id) load(id);
   }, [id, activeId, data, load]);
 
-  if (!data || activeId !== id) {
-    return (
-      <div className="space-y-2">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-4 w-full" />
-        ))}
-      </div>
-    );
-  }
+  const rows = rowsFor(id);
 
   return (
     <div className="space-y-4">
-      {data.description && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">Description</h4>
-          <p className="text-sm text-slate-600">{data.description}</p>
-        </section>
-      )}
+      {!data || activeId !== id ? (
+        <div className="space-y-2">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
+        </div>
+      ) : (
+        <>
+          {data.description && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">Description</h4>
+              <p className="text-sm text-slate-600">{data.description}</p>
+            </section>
+          )}
 
-      {data.entities?.length > 0 && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">Entities</h4>
-          <ul className="text-sm list-disc pl-5 space-y-1">
-            {data.entities.map((e, idx) => (
-              <li key={idx}>{e.name}: {Array.isArray(e.fields) ? e.fields.join(", ") : ""}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {data.entities?.length > 0 && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">Entities</h4>
+              <ul className="text-sm list-disc pl-5 space-y-1">
+                {data.entities.map((e, idx) => (
+                  <li key={idx}>{e.name}: {Array.isArray(e.fields) ? e.fields.join(", ") : ""}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {data.api_endpoints?.length > 0 && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">API Endpoints</h4>
-          <ul className="text-sm list-disc pl-5 space-y-1">
-            {data.api_endpoints.map((ep, idx) => (
-              <li key={idx}>{ep}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {data.api_endpoints?.length > 0 && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">API Endpoints</h4>
+              <ul className="text-sm list-disc pl-5 space-y-1">
+                {data.api_endpoints.map((ep, idx) => (
+                  <li key={idx}>{ep}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {data.ui_structure?.length > 0 && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">UI Structure</h4>
-          <ul className="text-sm list-disc pl-5 space-y-1">
-            {data.ui_structure.map((u, idx) => (
-              <li key={idx}>{u}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {data.ui_structure?.length > 0 && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">UI Structure</h4>
+              <ul className="text-sm list-disc pl-5 space-y-1">
+                {data.ui_structure.map((u, idx) => (
+                  <li key={idx}>{u}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {data.integrations?.length > 0 && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">Integrations</h4>
-          <div className="flex flex-wrap gap-1">
-            {data.integrations.map((i) => (
-              <Badge key={i} className="bg-slate-800 text-white">{i}</Badge>
-            ))}
-          </div>
-        </section>
-      )}
+          {data.integrations?.length > 0 && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">Integrations</h4>
+              <div className="flex flex-wrap gap-1">
+                {data.integrations.map((i) => (
+                  <Badge key={i} className="bg-slate-800 text-white">{i}</Badge>
+                ))}
+              </div>
+            </section>
+          )}
 
-      {data.acceptance_criteria?.length > 0 && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">Acceptance Criteria</h4>
-          <ul className="text-sm list-disc pl-5 space-y-1">
-            {data.acceptance_criteria.map((c, idx) => (
-              <li key={idx}>{c}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {data.acceptance_criteria?.length > 0 && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">Acceptance Criteria</h4>
+              <ul className="text-sm list-disc pl-5 space-y-1">
+                {data.acceptance_criteria.map((c, idx) => (
+                  <li key={idx}>{c}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {data.tests?.length > 0 && (
-        <section>
-          <h4 className="text-sm font-semibold mb-1">Tests</h4>
-          <ul className="text-sm list-disc pl-5 space-y-1">
-            {data.tests.map((t, idx) => (
-              <li key={idx}>{t}</li>
-            ))}
-          </ul>
-        </section>
+          {data.tests?.length > 0 && (
+            <section>
+              <h4 className="text-sm font-semibold mb-1">Tests</h4>
+              <ul className="text-sm list-disc pl-5 space-y-1">
+                {data.tests.map((t, idx) => (
+                  <li key={idx}>{t}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section>
+            <h4 className="text-sm font-semibold mb-2">Parameters (Overrides)</h4>
+            {rows.length === 0 && (
+              <p className="text-xs text-slate-500 mb-2">Add custom parameters to guide generation.</p>
+            )}
+            <div className="space-y-2">
+              {rows.map((row, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Input placeholder="Key" value={row.k} onChange={(e) => updateRow(id, idx, 'k', e.target.value)} />
+                  <Input placeholder="Value" value={row.v} onChange={(e) => updateRow(id, idx, 'v', e.target.value)} />
+                  <Button variant="outline" className="rounded-full" onClick={() => removeRow(id, idx)}>
+                    <Trash size={14} />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="rounded-full" onClick={() => addRow(id)}>
+                <Plus size={14} className="mr-2" />Add parameter
+              </Button>
+            </div>
+            <div className="mt-4">
+              <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={onCreate}>
+                <Rocket size={14} className="mr-2" />Create with Overrides
+              </Button>
+            </div>
+          </section>
+        </>
       )}
     </div>
   );
