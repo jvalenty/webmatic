@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { Calendar } from "../../components/ui/calendar";
 import { Calendar as CalendarIcon, Rocket, Plus, RefreshCw } from "lucide-react";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+
 const StatusBadge = ({ status }) => {
   const color = status === "planned" ? "bg-emerald-600" : status === "created" ? "bg-slate-700" : "bg-blue-600";
   return <Badge className={`${color} text-white`}>{status}</Badge>;
