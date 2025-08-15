@@ -160,7 +160,9 @@ class WebmaticAPITester:
             ("Create Project", self.test_create_project),
             ("List Projects", self.test_list_projects),
             ("Get Project", self.test_get_project),
-            ("Scaffold Project", self.test_scaffold_project),
+            ("Scaffold Project (Claude)", lambda: self.test_scaffold_project_with_provider("claude")),
+            ("Scaffold Project (GPT)", lambda: self.test_scaffold_project_with_provider("gpt")),
+            ("Scaffold Project (Auto)", lambda: self.test_scaffold_project_with_provider("auto")),
         ]
 
         for test_name, test_func in tests:
