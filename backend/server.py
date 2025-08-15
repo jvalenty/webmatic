@@ -27,10 +27,12 @@ api_router.include_router(templates_router)
 app.include_router(api_router)
 
 # CORS
+_origins = CORS_ORIGINS
+_allow_credentials = False if any(o.strip() == "*" for o in _origins) else True
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=CORS_ORIGINS,
+    allow_credentials=_allow_credentials,
+    allow_origins=_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
