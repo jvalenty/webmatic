@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Tuple
 from datetime import datetime
 from .models import Plan, Project
 from ..llm.planner import plan_from_llm
@@ -58,10 +58,12 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
     )
 
 
-async def compute_plan(description: str, provider: str | None) -> Plan:
-    """Try AI plan first; fall back to stub if not configured or on error."""
+async def compute_plan(description: str, provider: Optional[str]) -> Tuple[Plan, Dict[str, Any]]:
+    """Return (plan, meta) where meta includes mode: ai|stub, provider, error (optional)."""
     try:
-        return await plan_from_llm(description, provider)
-    except Exception:
+        plan = await plan_from_llm(description, provider)
+        return plan, {"mode": "ai", "provider": (provider or "auto")}
+    except Exception as e:
         # fallback silently to stub to ensure UX continuity
-        return await compute_stub_plan(description)
+        plan = await compute_stub_plan(description)
+        return plan, {"mode": "stub", "provider": (provider or "auto"), "error": str(e)}

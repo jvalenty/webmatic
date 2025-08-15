@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel
+import uuid
 from ..core.db import db
 from .models import Project, ProjectCreate
 from .services import compute_plan, doc_to_project
@@ -9,7 +10,7 @@ from .services import compute_plan, doc_to_project
 router = APIRouter()
 
 class ScaffoldRequest(BaseModel):
-    provider: Optional[str] = "auto"  # "claude" | "gpt" | "auto"
+  provider: Optional[str] = "auto"  # "claude" | "gpt" | "auto"
 
 @router.post("/projects", response_model=Project)
 async def create_project(payload: ProjectCreate):
@@ -31,6 +32,23 @@ async def get_project(project_id: str):
         raise HTTPException(status_code=404, detail="Project not found")
     return doc_to_project(doc)
 
+@router.get("/projects/{project_id}/runs")
+async def list_runs(project_id: str) -> List[Dict[str, Any]]:
+    docs = await db.runs.find({"project_id": project_id}).sort("created_at", -1).to_list(200)
+    out = []
+    for d in docs:
+        out.append({
+            "id": d.get("_id"),
+            "project_id": d.get("project_id"),
+            "provider": d.get("provider"),
+            "mode": d.get("mode"),
+            "status": d.get("status"),
+            "error": d.get("error"),
+            "plan_counts": d.get("plan_counts", {}),
+            "created_at": d.get("created_at"),
+        })
+    return out
+
 @router.post("/projects/{project_id}/scaffold", response_model=Project)
 async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = None):
     doc = await db.projects.find_one({"_id": project_id})
@@ -39,7 +57,8 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
 
     provider = (payload.provider if payload else "auto") if payload else "auto"
     prj = doc_to_project(doc)
-    plan = await compute_plan(prj.description, provider)
+
+    plan, meta = await compute_plan(prj.description, provider)
     prj.plan = plan
     prj.status = "planned"
     prj.updated_at = datetime.utcnow()
@@ -52,4 +71,22 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
             "updated_at": prj.updated_at,
         }}
     )
+
+    # Record a run for history
+    run_doc = {
+        "_id": str(uuid.uuid4()),
+        "project_id": project_id,
+        "provider": meta.get("provider"),
+        "mode": meta.get("mode"),
+        "status": "success",
+        "error": meta.get("error"),
+        "plan_counts": {
+            "frontend": len(plan.frontend or []),
+            "backend": len(plan.backend or []),
+            "database": len(plan.database or []),
+        },
+        "created_at": datetime.utcnow(),
+    }
+    await db.runs.insert_one(run_doc)
+
     return prj

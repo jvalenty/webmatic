@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Badge } from "../../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Skeleton } from "../../components/ui/skeleton";
+mport { Skeleton } from "../../components/ui/skeleton";
 import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
 import { Calendar } from "../../components/ui/calendar";
@@ -27,6 +27,8 @@ export default function ProjectsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [provider, setProvider] = useState("auto");
+  const [runs, setRuns] = useState([]);
+  const [runsLoading, setRunsLoading] = useState(false);
 
   const load = async () => {
     try {
@@ -42,10 +44,27 @@ export default function ProjectsPage() {
     }
   };
 
+  const loadRuns = async (pid) => {
+    if (!pid) return;
+    try {
+      setRunsLoading(true);
+      const data = await ProjectsAPI.runs(pid);
+      setRuns(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRunsLoading(false);
+    }
+  };
+
   useEffect(() => {
     load();
     ProjectsAPI.health().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (selected?.id) loadRuns(selected.id);
+  }, [selected?.id]);
 
   const createProject = async () => {
     if (!name.trim() || !description.trim()) {
@@ -74,6 +93,7 @@ export default function ProjectsPage() {
       const p = await ProjectsAPI.scaffold(id, provider);
       setProjects((prev) => prev.map((x) => (x.id === id ? p : x)));
       setSelected(p.id === selected?.id ? p : selected);
+      await loadRuns(id);
       toast.success("Plan generated", { id: `scaffold-${id}` });
     } catch (e) {
       console.error(e);
@@ -225,6 +245,7 @@ export default function ProjectsPage() {
                       <TabsTrigger value="plan">Plan</TabsTrigger>
                       <TabsTrigger value="api">API</TabsTrigger>
                       <TabsTrigger value="db">DB</TabsTrigger>
+                      <TabsTrigger value="runs">Runs</TabsTrigger>
                     </TabsList>
                     <TabsContent value="plan">
                       {!selected.plan ? (
@@ -252,6 +273,46 @@ export default function ProjectsPage() {
                         <li>Primary key: _id (UUID string)</li>
                         <li>Fields: id, name, description, status, plan, created_at, updated_at</li>
                       </ul>
+                    </TabsContent>
+                    <TabsContent value="runs">
+                      {runsLoading ? (
+                        <div className="space-y-2">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="flex items-center gap-4">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-4 w-20" />
+                              <Skeleton className="h-4 w-32" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : runs.length === 0 ? (
+                        <div className="text-sm text-slate-500">No runs yet.</div>
+                      ) : (
+                        <div className="overflow-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>When</TableHead>
+                                <TableHead>Provider</TableHead>
+                                <TableHead>Mode</TableHead>
+                                <TableHead>Counts</TableHead>
+                                <TableHead>Status</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {runs.map((r) => (
+                                <TableRow key={r.id}>
+                                  <TableCell>{new Date(r.created_at).toLocaleString()}</TableCell>
+                                  <TableCell className="capitalize">{r.provider}</TableCell>
+                                  <TableCell className="capitalize">{r.mode}</TableCell>
+                                  <TableCell>{`F:${r?.plan_counts?.frontend || 0} • B:${r?.plan_counts?.backend || 0} • D:${r?.plan_counts?.database || 0}`}</TableCell>
+                                  <TableCell>{r.status}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                     </TabsContent>
                   </Tabs>
                 </div>
