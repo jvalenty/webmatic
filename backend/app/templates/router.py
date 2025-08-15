@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import uuid
+from pydantic import BaseModel
 
 from ..core.db import db
 from .models import TemplateManifest
