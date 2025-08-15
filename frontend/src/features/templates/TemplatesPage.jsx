@@ -1,0 +1,275 @@
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { TemplatesAPI } from "./api";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Toaster } from "../../components/ui/sonner";
+import { toast } from "sonner";
+import { Eye, Rocket } from "lucide-react";
+
+export default function TemplatesPage() {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [provider, setProvider] = useState("auto");
+  const [nameById, setNameById] = useState({});
+  const [previewId, setPreviewId] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const loadTemplates = async () => {
+    try {
+      setLoading(true);
+      const list = await TemplatesAPI.list();
+      setTemplates(list);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to load templates");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openPreview = async (id) => {
+    try {
+      setPreviewLoading(true);
+      setPreview(null);
+      setPreviewId(id);
+      const detail = await TemplatesAPI.get(id);
+      setPreview(detail);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to load template");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const createFromTemplate = async (tpl) => {
+    try {
+      toast.loading("Creating from template...", { id: `tpl-${tpl.id}` });
+      const p = await TemplatesAPI.createFromTemplate({
+        template_id: tpl.id,
+        name: nameById[tpl.id] || tpl.name,
+        provider,
+      });
+      toast.success("Project created", { id: `tpl-${tpl.id}` });
+      navigate("/");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to create from template", { id: `tpl-${tpl.id}` });
+    }
+  };
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[hsl(210,20%,98%)]">
+      <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 grid place-items-center text-white shadow-md">WM</div>
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">Templates</h1>
+              <p className="text-xs text-slate-500">Kickstart with proven blueprints</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={provider} onValueChange={setProvider}>
+              <SelectTrigger className="w-[160px] rounded-full">
+                <SelectValue placeholder="Provider" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Auto</SelectItem>
+                <SelectItem value="claude">Claude</SelectItem>
+                <SelectItem value="gpt">GPT</SelectItem>
+              </SelectContent>
+            </Select>
+            <Link to="/">
+              <Button variant="secondary" className="rounded-full">Back to Projects</Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-6 py-10">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="shadow-sm border-slate-200">
+                <CardHeader>
+                  <Skeleton className="h-5 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3 mt-2" />
+                  <div className="mt-4 flex items-center gap-3">
+                    <Skeleton className="h-9 w-24" />
+                    <Skeleton className="h-9 w-36" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {templates.map((tpl) => (
+              <Card key={tpl.id} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow duration-150">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{tpl.name}</span>
+                    <span className="text-xs text-slate-500">{tpl.category}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 min-h-12">{tpl.description}</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {tpl.tags?.map((t) => (
+                      <Badge key={t} className="bg-slate-800 text-white">{t}</Badge>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="rounded-full">
+                          <Eye size={14} className="mr-2" />Preview
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>{preview?.name || "Template"}</DialogTitle>
+                        </DialogHeader>
+                        {previewLoading ? (
+                          <div className="space-y-2">
+                            {[...Array(4)].map((_, i) => (
+                              <Skeleton key={i} className="h-4 w-full" />
+                            ))}
+                          </div>
+                        ) : (
+                          <TemplatePreview id={tpl.id} load={openPreview} data={preview} activeId={previewId} />
+                        )}
+                      </DialogContent>
+                    </Dialog>
+
+                    <Input
+                      placeholder={`${tpl.name} project name`}
+                      value={nameById[tpl.id] || ""}
+                      onChange={(e) => setNameById((prev) => ({ ...prev, [tpl.id]: e.target.value }))}
+                    />
+                    <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl)}>
+                      <Rocket size={14} className="mr-2" />Create
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+
+      <Toaster richColors position="top-right" />
+    </div>
+  );
+}
+
+function TemplatePreview({ id, load, data, activeId }) {
+  useEffect(() => {
+    if (!data || activeId !== id) load(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, activeId]);
+
+  if (!data || activeId !== id) {
+    return (
+      <div className="space-y-2">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-4 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {data.description && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">Description</h4>
+          <p className="text-sm text-slate-600">{data.description}</p>
+        </section>
+      )}
+
+      {data.entities?.length > 0 && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">Entities</h4>
+          <ul className="text-sm list-disc pl-5 space-y-1">
+            {data.entities.map((e, idx) => (
+              <li key={idx}>{e.name}: {Array.isArray(e.fields) ? e.fields.join(", ") : ""}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {data.api_endpoints?.length > 0 && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">API Endpoints</h4>
+          <ul className="text-sm list-disc pl-5 space-y-1">
+            {data.api_endpoints.map((ep, idx) => (
+              <li key={idx}>{ep}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {data.ui_structure?.length > 0 && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">UI Structure</h4>
+          <ul className="text-sm list-disc pl-5 space-y-1">
+            {data.ui_structure.map((u, idx) => (
+              <li key={idx}>{u}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {data.integrations?.length > 0 && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">Integrations</h4>
+          <div className="flex flex-wrap gap-1">
+            {data.integrations.map((i) => (
+              <Badge key={i} className="bg-slate-800 text-white">{i}</Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {data.acceptance_criteria?.length > 0 && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">Acceptance Criteria</h4>
+          <ul className="text-sm list-disc pl-5 space-y-1">
+            {data.acceptance_criteria.map((c, idx) => (
+              <li key={idx}>{c}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {data.tests?.length > 0 && (
+        <section>
+          <h4 className="text-sm font-semibold mb-1">Tests</h4>
+          <ul className="text-sm list-disc pl-5 space-y-1">
+            {data.tests.map((t, idx) => (
+              <li key={idx}>{t}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ProjectsAPI } from "./api";
 import { TemplatesAPI } from "../templates/api";
 import { Button } from "../../components/ui/button";
@@ -145,7 +146,9 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="secondary" className="rounded-full">Docs</Button>
+            <Link to="/templates">
+              <Button variant="secondary" className="rounded-full">Templates</Button>
+            </Link>
             <Button className="rounded-full bg-slate-900 hover:bg-slate-800"><Rocket size={16} className="mr-2" />Generate</Button>
           </div>
         </div>
