@@ -25,6 +25,7 @@ export default function ProjectsPage() {
   const [selected, setSelected] = useState(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [provider, setProvider] = useState("auto");
 
   const load = async () => {
     try {
