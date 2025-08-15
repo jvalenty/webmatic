@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ProjectsAPI } from "./api";
+import { TemplatesAPI } from "../templates/api";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
@@ -29,6 +30,9 @@ export default function ProjectsPage() {
   const [provider, setProvider] = useState("auto");
   const [runs, setRuns] = useState([]);
   const [runsLoading, setRunsLoading] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [templateNames, setTemplateNames] = useState({});
 
   const load = async () => {
     try {
@@ -41,6 +45,18 @@ export default function ProjectsPage() {
       toast.error("Failed to load projects");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTemplates = async () => {
+    try {
+      setTemplatesLoading(true);
+      const list = await TemplatesAPI.list();
+      setTemplates(list);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTemplatesLoading(false);
     }
   };
 
@@ -59,6 +75,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     load();
+    loadTemplates();
     ProjectsAPI.health().catch(() => {});
   }, []);
 
@@ -98,6 +115,21 @@ export default function ProjectsPage() {
     } catch (e) {
       console.error(e);
       toast.error("Failed to generate plan", { id: `scaffold-${id}` });
+    }
+  };
+
+  const createFromTemplate = async (tpl) => {
+    try {
+      const projName = templateNames[tpl.id] || tpl.name;
+      toast.loading("Creating from template...", { id: `tpl-${tpl.id}` });
+      const p = await TemplatesAPI.createFromTemplate({ template_id: tpl.id, name: projName, provider });
+      setProjects((prev) => [p, ...prev]);
+      setSelected(p);
+      await loadRuns(p.id);
+      toast.success("Project created from template", { id: `tpl-${tpl.id}` });
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to create from template", { id: `tpl-${tpl.id}` });
     }
   };
 
@@ -165,6 +197,57 @@ export default function ProjectsPage() {
               </CardHeader>
               <CardContent>
                 <Calendar mode="single" className="rounded-xl border" />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-6">
+            <Card className="shadow-sm border-slate-200">
+              <CardHeader>
+                <CardTitle>Templates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {templatesLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="flex-1">
+                          <Skeleton className="h-4 w-2/3" />
+                          <Skeleton className="h-4 w-1/2 mt-2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {templates.map((tpl) => (
+                      <div key={tpl.id} className="rounded-xl border p-4 bg-white/70">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-medium">{tpl.name}</div>
+                            <div className="text-xs text-slate-600">{tpl.description}</div>
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {tpl.tags?.map((t) => (
+                                <Badge key={t} className="bg-slate-800 text-white">{t}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center gap-2">
+                          <Input
+                            placeholder={`${tpl.name} project name`}
+                            value={templateNames[tpl.id] || ""}
+                            onChange={(e) => setTemplateNames((prev) => ({ ...prev, [tpl.id]: e.target.value }))}
+                          />
+                          <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl)}>
+                            Create from Template
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -265,13 +348,14 @@ export default function ProjectsPage() {
                         <li>GET /api/projects</li>
                         <li>GET /api/projects/:id</li>
                         <li>POST /api/projects/:id/scaffold</li>
+                        <li>POST /api/projects/from-template</li>
                       </ul>
                     </TabsContent>
                     <TabsContent value="db">
                       <ul className="text-sm list-disc pl-6 space-y-1">
-                        <li>Collection: projects</li>
-                        <li>Primary key: _id (UUID string)</li>
-                        <li>Fields: id, name, description, status, plan, created_at, updated_at</li>
+                        <li>Collections: projects, runs, templates</li>
+                        <li>Primary keys: _id (UUID string)</li>
+                        <li>Projects: id, name, description, status, plan, created_at, updated_at</li>
                       </ul>
                     </TabsContent>
                     <TabsContent value="runs">
