@@ -8,9 +8,10 @@ import { Input } from "../../components/ui/input";
 import { Skeleton } from "../../components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
 import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
-import { Eye, Rocket, Plus, Trash } from "lucide-react";
+import { Eye, Rocket, Plus, Trash, Sparkles, X } from "lucide-react";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState([]);
@@ -75,6 +76,18 @@ export default function TemplatesPage() {
     return obj;
   };
 
+  const applyPreset = (id, presetObj) => {
+    setOverridesDraftById((prev) => {
+      const existingRows = prev[id] || [];
+      const existingObj = {};
+      existingRows.forEach(({ k, v }) => { if (k && k.trim()) existingObj[k.trim()] = v; });
+      const merged = { ...existingObj, ...presetObj };
+      const nextRows = Object.entries(merged).map(([k, v]) => ({ k, v }));
+      return { ...prev, [id]: nextRows };
+    });
+    toast.success("Preset applied");
+  };
+
   const createFromTemplate = async (tpl, withOverrides = false) => {
     try {
       const projName = nameById[tpl.id] || tpl.name;
@@ -115,7 +128,22 @@ export default function TemplatesPage() {
                 <SelectItem value="gpt">GPT</SelectItem>
               </SelectContent>
             </Select>
-            <Input placeholder="Optional model (e.g., claude-3-5-sonnet)" value={model} onChange={(e) => setModel(e.target.value)} />
+            <div className="flex items-center gap-2">
+              <Input placeholder="Optional model (e.g., claude-3-5-sonnet)" value={model} onChange={(e) => setModel(e.target.value)} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="rounded-full">
+                    <Sparkles size={14} className="mr-2" /> Model helper
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <ModelHelper provider={provider} onPick={setModel} />
+                </PopoverContent>
+              </Popover>
+              {model && (
+                <Button variant="outline" className="rounded-full" onClick={() => setModel("")}> <X size={14} className="mr-1"/> Clear</Button>
+              )}
+            </div>
             <Link to="/">
               <Button variant="secondary" className="rounded-full">Back to Projects</Button>
             </Link>
@@ -178,7 +206,7 @@ export default function TemplatesPage() {
                             ))}
                           </div>
                         ) : (
-                          <TemplatePreview id={tpl.id} load={openPreview} data={preview} activeId={previewId} rowsFor={rowsFor} addRow={addRow} updateRow={updateRow} removeRow={removeRow} onCreate={() => createFromTemplate(tpl, true)} />
+                          <TemplatePreview id={tpl.id} load={openPreview} data={preview} activeId={previewId} rowsFor={rowsFor} addRow={addRow} updateRow={updateRow} removeRow={removeRow} onApplyPreset={applyPreset} onCreate={() => createFromTemplate(tpl, true)} />
                         )}
                       </DialogContent>
                     </Dialog>
@@ -204,12 +232,64 @@ export default function TemplatesPage() {
   );
 }
 
-function TemplatePreview({ id, load, data, activeId, rowsFor, addRow, updateRow, removeRow, onCreate }) {
+function recommendedModels(provider) {
+  const maps = {
+    claude: ["claude-3-5-sonnet", "claude-3-5-haiku"],
+    gpt: ["gpt-4.1", "gpt-4o-mini"],
+    auto: ["claude-3-5-sonnet", "gpt-4.1"],
+  };
+  return maps[provider] || maps.auto;
+}
+
+function ModelHelper({ provider, onPick }) {
+  const recs = recommendedModels(provider);
+  return (
+    <div className="space-y-2">
+      <div className="text-sm font-semibold">Recommended models</div>
+      <div className="flex flex-wrap gap-2">
+        {recs.map((m) => (
+          <Button key={m} variant="outline" className="rounded-full" onClick={() => onPick(m)}>
+            <Sparkles size={14} className="mr-2" /> {m}
+          </Button>
+        ))}
+      </div>
+      <div className="text-xs text-slate-500 mt-2">Pick one to auto-fill the model input.</div>
+    </div>
+  );
+}
+
+function derivePresets(templateName) {
+  const n = (templateName || "").toLowerCase();
+  if (n.includes("crm")) {
+    return [
+      { label: "Multi-tenant + Roles", values: { tenants: "multi", roles: "owner,admin,manager,user" } },
+      { label: "Pipeline stages", values: { deal_stages: "lead,qualified,proposal,won,lost" } },
+    ];
+  }
+  if (n.includes("billing")) {
+    return [
+      { label: "Monthly USD", values: { currency: "USD", billing_cycle: "monthly" } },
+      { label: "Dunning", values: { dunning_retries: "3", retry_backoff_days: "3" } },
+    ];
+  }
+  if (n.includes("analytics")) {
+    return [
+      { label: "Time-series + Cohorts", values: { charts: "timeseries,cohort", retention_window: "90d" } },
+      { label: "Exports", values: { export_formats: "csv,xlsx" } },
+    ];
+  }
+  return [
+    { label: "Basic", values: { environment: "staging" } },
+  ];
+}
+
+function TemplatePreview({ id, load, data, activeId, rowsFor, addRow, updateRow, removeRow, onApplyPreset, onCreate }) {
   useEffect(() => {
     if (!data || activeId !== id) load(id);
   }, [id, activeId, data, load]);
 
   const rows = rowsFor(id);
+  const presets = derivePresets(data?.name);
 
   return (
     <div className="space-y-4">
@@ -293,6 +373,17 @@ function TemplatePreview({ id, load, data, activeId, rowsFor, addRow, updateRow,
               </ul>
             </section>
           )}
+
+          <section>
+            <h4 className="text-sm font-semibold mb-2">Presets</h4>
+            <div className="flex flex-wrap gap-2">
+              {presets.map((p) => (
+                <Button key={p.label} variant="outline" className="rounded-full" onClick={() => onApplyPreset(id, p.values)}>
+                  <Plus size={14} className="mr-2" />{p.label}
+                </Button>
+              ))}
+            </div>
+          </section>
 
           <section>
             <h4 className="text-sm font-semibold mb-2">Parameters (Overrides)</h4>
