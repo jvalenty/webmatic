@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from datetime import datetime
 from .models import Plan, Project
+from ..llm.planner import plan_from_llm
 
 async def compute_stub_plan(description: str) -> Plan:
     base_frontend = [
@@ -55,3 +56,12 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
         created_at=doc.get("created_at", datetime.utcnow()),
         updated_at=doc.get("updated_at", datetime.utcnow()),
     )
+
+
+async def compute_plan(description: str, provider: str | None) -> Plan:
+    """Try AI plan first; fall back to stub if not configured or on error."""
+    try:
+        return await plan_from_llm(description, provider)
+    except Exception:
+        # fallback silently to stub to ensure UX continuity
+        return await compute_stub_plan(description)
