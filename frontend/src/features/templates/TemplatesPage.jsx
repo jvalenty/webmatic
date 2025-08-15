@@ -129,7 +129,7 @@ export default function TemplatesPage() {
               </SelectContent>
             </Select>
             <div className="flex items-center gap-2">
-              <Input placeholder="Optional model (e.g., claude-3-5-sonnet)" value={model} onChange={(e) => setModel(e.target.value)} />
+              <Input placeholder="Optional model (e.g., claude-4-sonnet or gpt-5)" value={model} onChange={(e) => setModel(e.target.value)} />
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="rounded-full">
