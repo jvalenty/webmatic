@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Backend API Testing for Webmatic.dev MVP
-Tests all CRUD operations and health endpoints using the public URL
+Tests quality score functionality and core flows using the public URL
 """
 
 import requests
@@ -17,6 +17,7 @@ class WebmaticAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.created_project_id = None
+        self.auth_token = None
 
     def log_test(self, name, success, details=""):
         """Log test results"""
