@@ -119,7 +119,7 @@ export default function ProjectBuilder() {
     try {
       setCreating(true);
       const proj = await ProjectsAPI.create({ name: firstWordsName, description: homePrompt.trim() });
-      await ProjectsAPI.scaffold(proj.id, homeProvider, homeModel);
+      await ProjectsAPI.scaffold(proj.id, homeProvider);
       navigate(`/project/${proj.id}`);
       toast.success("Project created");
     } catch (e) { console.error(e); toast.error("Failed to create"); } finally { setCreating(false); }
