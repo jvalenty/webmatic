@@ -36,5 +36,9 @@ export const ProjectsAPI = {
   async runs(id) {
     const { data } = await api.get(`/projects/${id}/runs`);
     return data;
-  }
+  },
+  async compareProviders(id) {
+    const { data } = await api.post(`/projects/${id}/compare-providers`);
+    return data;
+  },
 };

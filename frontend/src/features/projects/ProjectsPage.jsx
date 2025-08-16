@@ -10,10 +10,11 @@ import { Badge } from "../../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Skeleton } from "../../components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
 import { Calendar } from "../../components/ui/calendar";
-import { Calendar as CalendarIcon, Rocket, Plus, RefreshCw } from "lucide-react";
+import { Calendar as CalendarIcon, Rocket, Plus, RefreshCw, Scale } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 
 const StatusBadge = ({ status }) => {
@@ -41,6 +42,11 @@ export default function ProjectsPage() {
   const [templates, setTemplates] = useState([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [templateNames, setTemplateNames] = useState({});
+
+  // compare state
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareData, setCompareData] = useState(null);
 
   useEffect(() => {
     // Adjust model when provider changes
@@ -144,6 +150,21 @@ export default function ProjectsPage() {
     } catch (e) {
       console.error(e);
       toast.error("Failed to create from template", { id: `tpl-${tpl.id}` });
+    }
+  };
+
+  const compareProviders = async () => {
+    if (!selected?.id) return;
+    try {
+      setCompareLoading(true);
+      const data = await ProjectsAPI.compareProviders(selected.id);
+      setCompareData(data);
+      setCompareOpen(true);
+    } catch (e) {
+      console.error(e);
+      toast.error("Comparison failed");
+    } finally {
+      setCompareLoading(false);
     }
   };
 
@@ -284,6 +305,42 @@ export default function ProjectsPage() {
           <Card className="shadow-sm border-slate-200">
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle>Projects</CardTitle>
+              <div className="flex items-center gap-2">
+                <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="rounded-full" onClick={compareProviders} disabled={!selected}>
+                      <Scale size={14} className="mr-2" />Compare Providers
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                      <DialogTitle>Provider comparison</DialogTitle>
+                    </DialogHeader>
+                    {compareLoading ? (
+                      <div className="grid grid-cols-3 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                          <Skeleton key={i} className="h-4 w-full" />
+                        ))}
+                      </div>
+                    ) : !compareData ? (
+                      <div className="text-sm text-slate-500">No comparison data</div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <CompareColumn title={`${compareData.baseline.provider} • ${compareData.baseline.model}`} plan={compareData.baseline.plan} />
+                        {compareData.variants.map((v, idx) => (
+                          <CompareColumn key={idx} title={`${v.provider} • ${v.model}`} plan={v.plan} />
+                        ))}
+                        <div>
+                          <div className="text-sm font-semibold mb-2">Diff</div>
+                          <DiffBlock label="Frontend" data={compareData.diff.frontend} />
+                          <DiffBlock label="Backend" data={compareData.diff.backend} />
+                          <DiffBlock label="Database" data={compareData.diff.database} />
+                        </div>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -375,6 +432,7 @@ export default function ProjectsPage() {
                         <li>GET /api/projects/:id</li>
                         <li>POST /api/projects/:id/scaffold</li>
                         <li>POST /api/projects/from-template</li>
+                        <li>POST /api/projects/:id/compare-providers</li>
                       </ul>
                     </TabsContent>
                     <TabsContent value="db">
@@ -454,6 +512,48 @@ function PlanList({ title, items }) {
             <li key={idx}>{it}</li>
           ))}
         </ul>
+      </div>
+    </div>
+  );
+}
+
+function CompareColumn({ title, plan }) {
+  return (
+    <div>
+      <div className="text-sm font-semibold mb-2">{title}</div>
+      <div className="space-y-4">
+        <PlanList title="Frontend" items={plan.frontend || []} />
+        <PlanList title="Backend" items={plan.backend || []} />
+        <PlanList title="Database" items={plan.database || []} />
+      </div>
+    </div>
+  );
+}
+
+function DiffBlock({ label, data }) {
+  if (!data) return <div className="text-sm text-slate-500">No diff</div>;
+  return (
+    <div className="mb-4">
+      <div className="text-xs font-semibold text-slate-600 mb-1">{label}</div>
+      <div className="grid grid-cols-1 gap-2">
+        <div className="rounded-lg border p-2">
+          <div className="text-xs text-slate-500 mb-1">Only in baseline</div>
+          <ul className="text-xs list-disc pl-5 space-y-1">
+            {data.only_in_a?.map((x, i) => <li key={i}>{x}</li>)}
+          </ul>
+        </div>
+        <div className="rounded-lg border p-2">
+          <div className="text-xs text-slate-500 mb-1">Only in variant</div>
+          <ul className="text-xs list-disc pl-5 space-y-1">
+            {data.only_in_b?.map((x, i) => <li key={i}>{x}</li>)}
+          </ul>
+        </div>
+        <div className="rounded-lg border p-2">
+          <div className="text-xs text-slate-500 mb-1">Overlap</div>
+          <ul className="text-xs list-disc pl-5 space-y-1">
+            {data.overlap?.map((x, i) => <li key={i}>{x}</li>)}
+          </ul>
+        </div>
       </div>
     </div>
   );

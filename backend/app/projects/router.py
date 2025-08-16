@@ -102,3 +102,74 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
     await db.runs.insert_one(run_doc)
 
     return prj
+
+# ---------- Provider comparison ----------
+class CompareResponse(BaseModel):
+    baseline: Dict[str, Any]
+    variants: List[Dict[str, Any]]
+    diff: Dict[str, Any]
+
+
+def _list_to_set_map(plan_list: List[str]) -> set:
+    return set([str(x).strip() for x in (plan_list or []) if str(x).strip()])
+
+
+def _diff_plans(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
+    # a/b have keys frontend/backend/database: List[str]
+    out = {}
+    for k in ["frontend", "backend", "database"]:
+        sa = _list_to_set_map(a.get(k, []))
+        sb = _list_to_set_map(b.get(k, []))
+        out[k] = {
+            "only_in_a": sorted(list(sa - sb)),
+            "only_in_b": sorted(list(sb - sa)),
+            "overlap": sorted(list(sa & sb)),
+        }
+    return out
+
+@router.post("/projects/{project_id}/compare-providers")
+async def compare_providers(project_id: str):
+    doc = await db.projects.find_one({"_id": project_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    prj = doc_to_project(doc)
+
+    combos = [
+        ("claude", "claude-4-sonnet"),
+        ("gpt", "gpt-5"),
+    ]
+
+    results = []
+    for provider, model in combos:
+        plan, meta = await compute_plan(prj.description, provider, model)
+        # store run record but do not update project
+        run_doc = {
+            "_id": str(uuid.uuid4()),
+            "project_id": project_id,
+            "provider": meta.get("provider"),
+            "model": meta.get("model"),
+            "mode": meta.get("mode"),
+            "status": "success",
+            "plan_counts": {
+                "frontend": len(plan.frontend or []),
+                "backend": len(plan.backend or []),
+                "database": len(plan.database or []),
+            },
+            "created_at": datetime.utcnow(),
+        }
+        await db.runs.insert_one(run_doc)
+        results.append({
+            "provider": provider,
+            "model": model,
+            "plan": plan.dict(),
+            "meta": meta,
+        })
+
+    # first is baseline
+    baseline = results[0]
+    variants = results[1:]
+
+    diff = _diff_plans(baseline["plan"], variants[0]["plan"]) if variants else {}
+
+    return CompareResponse(baseline=baseline, variants=variants, diff=diff)
