@@ -45,7 +45,54 @@ class WebmaticAPITester:
             self.log_test("Health Check", False, f"- Error: {str(e)}")
         return False
 
-    def test_create_project(self):
+    def test_auth_register(self):
+        """Test user registration"""
+        payload = {
+            "email": f"testuser_{datetime.now().strftime('%Y%m%d_%H%M%S')}@example.com",
+            "password": "SecurePass123!"
+        }
+        try:
+            response = requests.post(
+                f"{self.base_url}/auth/register",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if "access_token" in data and data.get("token_type") == "bearer":
+                    self.auth_token = data["access_token"]
+                    self.log_test("Auth Register", True, f"- Token received")
+                    return True
+                else:
+                    self.log_test("Auth Register", False, f"- Invalid response: {data}")
+            else:
+                self.log_test("Auth Register", False, f"- Status: {response.status_code}, Body: {response.text}")
+        except Exception as e:
+            self.log_test("Auth Register", False, f"- Error: {str(e)}")
+        return False
+
+    def test_auth_me(self):
+        """Test getting current user info with Bearer token"""
+        if not self.auth_token:
+            self.log_test("Auth Me", False, "- No auth token available")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = requests.get(f"{self.base_url}/auth/me", headers=headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if "user_id" in data and "email" in data:
+                    self.log_test("Auth Me", True, f"- User ID: {data['user_id'][:8]}...")
+                    return True
+                else:
+                    self.log_test("Auth Me", False, f"- Invalid response: {data}")
+            else:
+                self.log_test("Auth Me", False, f"- Status: {response.status_code}")
+        except Exception as e:
+            self.log_test("Auth Me", False, f"- Error: {str(e)}")
+        return False
         """Test project creation"""
         payload = {
             "name": "AI Planner Test",
