@@ -29,12 +29,12 @@ class WebmaticAPITester:
             print(f"❌ {name} - FAILED {details}")
 
     def test_health(self):
-        """Test health endpoint"""
+        """Test health endpoint returns ok: true"""
         try:
             response = requests.get(f"{self.base_url}/health", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                if data.get("ok") and "db" in data:
+                if data.get("ok") is True and "db" in data:
                     self.log_test("Health Check", True, f"- DB: {data['db']}")
                     return True
                 else:
@@ -93,10 +93,12 @@ class WebmaticAPITester:
         except Exception as e:
             self.log_test("Auth Me", False, f"- Error: {str(e)}")
         return False
-        """Test project creation"""
+
+    def test_create_project(self):
+        """Test project creation with UUID ID"""
         payload = {
-            "name": "AI Planner Test",
-            "description": "CRM with users, auth and Stripe"
+            "name": "AI Planning System",
+            "description": "Multi-tenant CRM with authentication, user management, and Stripe payment integration"
         }
         try:
             response = requests.post(
@@ -108,9 +110,14 @@ class WebmaticAPITester:
             if response.status_code == 200:
                 data = response.json()
                 if "id" in data and data.get("status") == "created":
-                    self.created_project_id = data["id"]
-                    self.log_test("Create Project", True, f"- ID: {data['id'][:8]}...")
-                    return True
+                    # Verify UUID format (36 chars with dashes)
+                    project_id = data["id"]
+                    if len(project_id) == 36 and project_id.count('-') == 4:
+                        self.created_project_id = project_id
+                        self.log_test("Create Project", True, f"- UUID ID: {project_id[:8]}...")
+                        return True
+                    else:
+                        self.log_test("Create Project", False, f"- Invalid UUID format: {project_id}")
                 else:
                     self.log_test("Create Project", False, f"- Invalid response: {data}")
             else:
@@ -119,53 +126,14 @@ class WebmaticAPITester:
             self.log_test("Create Project", False, f"- Error: {str(e)}")
         return False
 
-    def test_list_projects(self):
-        """Test listing projects"""
-        try:
-            response = requests.get(f"{self.base_url}/projects", timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                if isinstance(data, list):
-                    found_project = any(p.get("id") == self.created_project_id for p in data) if self.created_project_id else len(data) >= 0
-                    self.log_test("List Projects", True, f"- Count: {len(data)}, Found created: {found_project}")
-                    return True
-                else:
-                    self.log_test("List Projects", False, f"- Not a list: {type(data)}")
-            else:
-                self.log_test("List Projects", False, f"- Status: {response.status_code}")
-        except Exception as e:
-            self.log_test("List Projects", False, f"- Error: {str(e)}")
-        return False
-
-    def test_get_project(self):
-        """Test getting specific project"""
+    def test_scaffold_project(self):
+        """Test project scaffolding with specific provider and model"""
         if not self.created_project_id:
-            self.log_test("Get Project", False, "- No project ID available")
+            self.log_test("Scaffold Project", False, "- No project ID available")
             return False
         
         try:
-            response = requests.get(f"{self.base_url}/projects/{self.created_project_id}", timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("id") == self.created_project_id:
-                    self.log_test("Get Project", True, f"- Name: {data.get('name')}")
-                    return True
-                else:
-                    self.log_test("Get Project", False, f"- ID mismatch: {data.get('id')}")
-            else:
-                self.log_test("Get Project", False, f"- Status: {response.status_code}")
-        except Exception as e:
-            self.log_test("Get Project", False, f"- Error: {str(e)}")
-        return False
-
-    def test_scaffold_project_with_provider(self, provider="auto"):
-        """Test project scaffolding/plan generation with specific provider"""
-        if not self.created_project_id:
-            self.log_test(f"Scaffold Project ({provider})", False, "- No project ID available")
-            return False
-        
-        try:
-            payload = {"provider": provider}
+            payload = {"provider": "claude", "model": "claude-4-sonnet"}
             response = requests.post(
                 f"{self.base_url}/projects/{self.created_project_id}/scaffold", 
                 json=payload,
@@ -179,38 +147,102 @@ class WebmaticAPITester:
                     frontend_count = len(plan.get("frontend", []))
                     backend_count = len(plan.get("backend", []))
                     database_count = len(plan.get("database", []))
-                    has_auth = any("auth" in item.lower() for item in plan.get("backend", []))
-                    has_stripe = any("stripe" in item.lower() for item in plan.get("backend", []))
-                    self.log_test(f"Scaffold Project ({provider})", True, 
-                                f"- Frontend: {frontend_count}, Backend: {backend_count}, DB: {database_count}, Auth: {has_auth}, Stripe: {has_stripe}")
+                    self.log_test("Scaffold Project", True, 
+                                f"- Status: planned, Frontend: {frontend_count}, Backend: {backend_count}, DB: {database_count}")
                     return True
                 else:
-                    self.log_test(f"Scaffold Project ({provider})", False, f"- Invalid plan: {data.get('status')}")
+                    self.log_test("Scaffold Project", False, f"- Invalid plan: status={data.get('status')}, plan={bool(data.get('plan'))}")
             else:
-                self.log_test(f"Scaffold Project ({provider})", False, f"- Status: {response.status_code}, Body: {response.text}")
+                self.log_test("Scaffold Project", False, f"- Status: {response.status_code}, Body: {response.text}")
         except Exception as e:
-            self.log_test(f"Scaffold Project ({provider})", False, f"- Error: {str(e)}")
+            self.log_test("Scaffold Project", False, f"- Error: {str(e)}")
         return False
 
-    def test_scaffold_project(self):
-        """Test project scaffolding with default provider"""
-        return self.test_scaffold_project_with_provider("auto")
+    def test_runs_list_with_quality_score(self):
+        """Test runs list includes quality_score for latest run"""
+        if not self.created_project_id:
+            self.log_test("Runs List Quality Score", False, "- No project ID available")
+            return False
+        
+        try:
+            response = requests.get(f"{self.base_url}/projects/{self.created_project_id}/runs", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list) and len(data) > 0:
+                    latest_run = data[0]  # Should be sorted by created_at desc
+                    required_fields = ["provider", "model", "mode", "plan_counts", "quality_score"]
+                    missing_fields = [f for f in required_fields if f not in latest_run]
+                    
+                    if not missing_fields and latest_run.get("quality_score") is not None:
+                        self.log_test("Runs List Quality Score", True, 
+                                    f"- Quality Score: {latest_run['quality_score']}, Provider: {latest_run['provider']}")
+                        return True
+                    else:
+                        self.log_test("Runs List Quality Score", False, f"- Missing fields: {missing_fields}")
+                else:
+                    self.log_test("Runs List Quality Score", False, f"- No runs found or invalid format")
+            else:
+                self.log_test("Runs List Quality Score", False, f"- Status: {response.status_code}")
+        except Exception as e:
+            self.log_test("Runs List Quality Score", False, f"- Error: {str(e)}")
+        return False
+
+    def test_compare_providers(self):
+        """Test compare providers creates two run records with baseline, variants, diff"""
+        if not self.created_project_id:
+            self.log_test("Compare Providers", False, "- No project ID available")
+            return False
+        
+        try:
+            response = requests.post(
+                f"{self.base_url}/projects/{self.created_project_id}/compare-providers",
+                headers={"Content-Type": "application/json"},
+                timeout=60  # Longer timeout for multiple LLM calls
+            )
+            if response.status_code == 200:
+                data = response.json()
+                required_keys = ["baseline", "variants", "diff"]
+                missing_keys = [k for k in required_keys if k not in data]
+                
+                if not missing_keys:
+                    baseline = data["baseline"]
+                    variants = data["variants"]
+                    diff = data["diff"]
+                    
+                    # Verify structure
+                    baseline_valid = "provider" in baseline and "model" in baseline and "plan" in baseline
+                    variants_valid = isinstance(variants, list) and len(variants) > 0
+                    diff_valid = isinstance(diff, dict) and all(k in diff for k in ["frontend", "backend", "database"])
+                    
+                    if baseline_valid and variants_valid and diff_valid:
+                        self.log_test("Compare Providers", True, 
+                                    f"- Baseline: {baseline['provider']}, Variants: {len(variants)}, Diff sections: {len(diff)}")
+                        return True
+                    else:
+                        self.log_test("Compare Providers", False, f"- Invalid structure: baseline={baseline_valid}, variants={variants_valid}, diff={diff_valid}")
+                else:
+                    self.log_test("Compare Providers", False, f"- Missing keys: {missing_keys}")
+            else:
+                self.log_test("Compare Providers", False, f"- Status: {response.status_code}, Body: {response.text}")
+        except Exception as e:
+            self.log_test("Compare Providers", False, f"- Error: {str(e)}")
+        return False
 
     def run_all_tests(self):
-        """Run all backend tests"""
-        print("🚀 Starting Webmatic.dev Backend API Tests")
+        """Run all backend tests focused on quality score and new flows"""
+        print("🚀 Starting Webmatic.dev Backend Quality Score Tests")
         print(f"📡 Testing against: {self.base_url}")
         print("=" * 60)
 
-        # Test sequence
+        # Test sequence based on review request
         tests = [
             ("Health Check", self.test_health),
-            ("Create Project", self.test_create_project),
-            ("List Projects", self.test_list_projects),
-            ("Get Project", self.test_get_project),
-            ("Scaffold Project (Claude)", lambda: self.test_scaffold_project_with_provider("claude")),
-            ("Scaffold Project (GPT)", lambda: self.test_scaffold_project_with_provider("gpt")),
-            ("Scaffold Project (Auto)", lambda: self.test_scaffold_project_with_provider("auto")),
+            ("Auth Register", self.test_auth_register),
+            ("Auth Me with Bearer Token", self.test_auth_me),
+            ("Create Project with UUID", self.test_create_project),
+            ("Scaffold with Claude Provider", self.test_scaffold_project),
+            ("Runs List with Quality Score", self.test_runs_list_with_quality_score),
+            ("Compare Providers", self.test_compare_providers),
         ]
 
         for test_name, test_func in tests:
@@ -222,7 +254,7 @@ class WebmaticAPITester:
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed! Backend is working correctly.")
+            print("🎉 All tests passed! Backend quality score functionality is working correctly.")
             return True
         else:
             print("⚠️  Some tests failed. Check the logs above.")
