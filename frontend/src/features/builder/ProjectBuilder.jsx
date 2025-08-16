@@ -39,7 +39,6 @@ export default function ProjectBuilder() {
   // Home tab chat
   const [homePrompt, setHomePrompt] = useState("");
   const [homeProvider, setHomeProvider] = useState("claude");
-  const [homeModel, setHomeModel] = useState("claude-4-sonnet");
   const [creating, setCreating] = useState(false);
 
   // Load current project
