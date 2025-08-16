@@ -7,6 +7,7 @@ import logging
 from ..core.db import db
 from .models import Project, ProjectCreate
 from .services import compute_plan, doc_to_project
+from .quality import score_plan
 from ..llm.constants import is_allowed_model, ALLOWED_MODELS
 
 router = APIRouter()
