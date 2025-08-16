@@ -98,7 +98,8 @@ export default function ProjectBuilder() {
     setMsg("");
     try {
       setRunning(true);
-      const updated = await ProjectsAPI.scaffold(id, provider, model);
+      // Only provider is sent; backend will choose model or use allowlist
+      const updated = await ProjectsAPI.scaffold(id, provider);
       setProject(updated);
       toast.success("Plan updated");
     } catch (e) {
