@@ -131,10 +131,9 @@ export default function ProjectBuilder() {
       <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="h-9 w-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 grid place-items-center text-white shadow-md">WM</Link>
+            <Link to="/" className="h-9 w-9 rounded-xl bg-slate-900 grid place-items-center text-white shadow-md">Ξ</Link>
             <div>
-              <div className="text-xs text-slate-500">WEBMATIC.dev</div>
-              <h1 className="text-lg font-semibold tracking-tight">{project?.name || "Project"}</h1>
+              <h1 className="text-lg font-semibold tracking-tight">WΞBMΛTIC.dev</h1>
             </div>
           </div>
           <div className="flex items-center gap-4">
