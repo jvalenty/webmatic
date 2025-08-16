@@ -51,6 +51,7 @@ async def list_runs(project_id: str) -> List[Dict[str, Any]]:
             "status": d.get("status"),
             "error": d.get("error"),
             "plan_counts": d.get("plan_counts", {}),
+            "quality_score": d.get("quality_score"),
             "created_at": d.get("created_at"),
         })
     return out
