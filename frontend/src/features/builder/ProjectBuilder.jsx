@@ -68,10 +68,8 @@ export default function ProjectBuilder() {
   // Adjust models when providers change
   // provider-only now; model auto-handled by backend
 
-  useEffect(() => {
-    const allowed = getModelsForProvider(homeProvider);
-    if (!allowed.includes(homeModel)) setHomeModel(allowed[0]);
-  }, [homeProvider]);
+  // provider-only now for Home tab as well; model auto-handled by backend
+
 
   // Agent: local chat persistence
   useEffect(() => {
