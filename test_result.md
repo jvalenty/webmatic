@@ -111,11 +111,14 @@
     file: "backend/app/projects/quality.py, backend/app/projects/router.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: true
         -agent: "main"
         -comment: "Implemented heuristic scorer, persisted quality_score and included in runs listing and compare runs."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ All backend tests passed: Health endpoint returns ok:true, Auth flow (register + me with Bearer token) works, Project creation with UUID works, Scaffold with claude/claude-4-sonnet updates status to planned and creates run with quality_score (63), Runs list includes quality_score, Compare providers creates baseline/variants/diff structure with two run records. Quality scoring system fully functional."
 
 ## frontend:
   - task: "Chat-first Home and Project Builder layout"
