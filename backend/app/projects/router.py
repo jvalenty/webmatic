@@ -85,6 +85,7 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
     )
 
     # Record a run for history
+    q, qd = score_plan(plan)
     run_doc = {
         "_id": str(uuid.uuid4()),
         "project_id": project_id,
@@ -98,6 +99,8 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
             "backend": len(plan.backend or []),
             "database": len(plan.database or []),
         },
+        "quality_score": q,
+        "quality_detail": qd,
         "created_at": datetime.utcnow(),
     }
     await db.runs.insert_one(run_doc)
