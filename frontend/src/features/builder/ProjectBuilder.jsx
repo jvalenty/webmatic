@@ -116,136 +116,120 @@ export default function ProjectBuilder() {
         </div>
       </header>
 
-      {/* Body: Left sidebar + Content */}
-      <main className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-12 gap-6">
-        {/* Left Projects Sidebar (25%) */}
-        <aside className="col-span-12 md:col-span-3">
-          <Card className="h-[calc(100vh-160px)] sticky top-[88px] overflow-hidden flex flex-col">
-            <CardContent className="p-4 flex-1 flex flex-col">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-medium">All Projects</div>
-                <div className="text-xs text-slate-500">{projects?.length || 0}</div>
-              </div>
-              <div className="flex-1 overflow-auto space-y-2 pr-1">
-                {listLoading ? (
-                  [...Array(8)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)
-                ) : (
-                  projects.map((p) => (
-                    <Link key={p.id} to={`/project/${p.id}`} className={`block rounded-lg border p-3 bg-white/70 hover:shadow-sm transition ${p.id === id ? 'border-slate-900' : 'border-slate-200'}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium line-clamp-1">{p.name}</div>
-                        <Badge className="bg-black text-white rounded-full h-5 px-2 text-[10px]">active</Badge>
-                      </div>
-                      <div className="text-xs text-slate-500 line-clamp-2 mt-1">{p.description}</div>
-                      <div className="text-[10px] mt-1 text-slate-500">{new Date(p.created_at).toLocaleDateString()}</div>
-                    </Link>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </aside>
+      {/* Body: Content only (no All Projects sidebar on project pages) */}
+      <main className="max-w-7xl mx-auto px-6 py-6">
+        <Tabs defaultValue="agent">
+          <TabsList>
+            <TabsTrigger value="home">Home</TabsTrigger>
+            <TabsTrigger value="agent">Agent</TabsTrigger>
+            <TabsTrigger value="files">Files</TabsTrigger>
+          </TabsList>
 
-        {/* Right Content (75%) */}
-        <section className="col-span-12 md:col-span-9">
-          <Tabs defaultValue="agent">
-            <TabsList>
-              <TabsTrigger value="agent">Agent</TabsTrigger>
-              <TabsTrigger value="files">Files</TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-            </TabsList>
+          {/* Home Tab (overview placeholder) */}
+          <TabsContent value="home">
+            <Card className="mt-4">
+              <CardContent className="p-6">
+                <div className="text-sm text-slate-600">Project overview coming soon.</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            {/* Agent Tab: Chat + Plan */}
-            <TabsContent value="agent">
-              <div className="grid grid-cols-12 gap-6 mt-4">
-                {/* Chat 25% */}
-                <div className="col-span-12 lg:col-span-3">
-                  <Card className="h-[calc(100vh-220px)] sticky top-[104px] flex flex-col">
-                    <CardContent className="p-4 flex-1 flex flex-col">
-                      <div className="text-xs text-slate-500 mb-2">Chat</div>
-                      <div className="flex-1 overflow-auto space-y-2">
-                        {chat.length === 0 ? (
-                          <div className="text-xs text-slate-400">Start chatting to refine the plan.</div>
-                        ) : (
-                          chat.map((m, i) => (
-                            <div key={i} className={"text-sm " + (m.role === "user" ? "text-slate-800" : "text-slate-600")}>
-                              {m.content}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <Textarea rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Ask to add auth, payments, testing…" />
-                        <div className="flex items-center gap-2">
-                          <Select value={provider} onValueChange={setProvider}>
-                            <SelectTrigger className="w-[120px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="claude">Claude</SelectItem>
-                              <SelectItem value="gpt">GPT</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select value={model} onValueChange={setModel}>
-                            <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Model" /></SelectTrigger>
-                            <SelectContent>
-                              {getModelsForProvider(provider).map((m) => (
-                                <SelectItem key={m} value={m}>{m}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={!authed || running}>{running ? "Generating…" : "Send"}</Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Output 75% */}
-                <div className="col-span-12 lg:col-span-9 space-y-6">
-                  <Card>
-                    <CardContent className="p-4">
-                      {loading ? (
-                        <div className="space-y-2">
-                          {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-4 w-2/3" />)}
-                        </div>
-                      ) : !project?.plan ? (
-                        <div className="text-sm text-slate-500">No plan yet. Send a message on the left to generate.</div>
+          {/* Agent Tab: Chat (25%) + Right body with Preview/Code tabs */}
+          <TabsContent value="agent">
+            <div className="grid grid-cols-12 gap-6 mt-4">
+              {/* Chat 25% */}
+              <div className="col-span-12 lg:col-span-3">
+                <Card className="h-[calc(100vh-220px)] sticky top-[104px] flex flex-col">
+                  <CardContent className="p-4 flex-1 flex flex-col">
+                    <div className="text-xs text-slate-500 mb-2">Chat</div>
+                    <div className="flex-1 overflow-auto space-y-2">
+                      {chat.length === 0 ? (
+                        <div className="text-xs text-slate-400">Start chatting to refine the plan.</div>
                       ) : (
-                        <div>
-                          <div className="text-sm font-medium mb-2">Plan Overview</div>
-                          <div className="text-xs text-slate-500 mb-4">Items • F:{counts.f} B:{counts.b} D:{counts.d}</div>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <PlanColumn title="Frontend" items={project.plan.frontend || []} />
-                            <PlanColumn title="Backend" items={project.plan.backend || []} />
-                            <PlanColumn title="Database" items={project.plan.database || []} />
+                        chat.map((m, i) => (
+                          <div key={i} className={"text-sm " + (m.role === "user" ? "text-slate-800" : "text-slate-600")}>
+                            {m.content}
                           </div>
-                        </div>
+                        ))
                       )}
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      <Textarea rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Ask to add auth, payments, testing…" />
+                      <div className="flex items-center gap-2">
+                        <Select value={provider} onValueChange={setProvider}>
+                          <SelectTrigger className="w-[120px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="claude">Claude</SelectItem>
+                            <SelectItem value="gpt">GPT</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select value={model} onValueChange={setModel}>
+                          <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Model" /></SelectTrigger>
+                          <SelectContent>
+                            {getModelsForProvider(provider).map((m) => (
+                              <SelectItem key={m} value={m}>{m}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={!authed || running}>{running ? "Generating…" : "Send"}</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </TabsContent>
 
-            {/* Files Tab */}
-            <TabsContent value="files">
-              <Card className="mt-4">
-                <CardContent className="p-6">
-                  <div className="text-sm text-slate-500">Files view coming soon.</div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+              {/* Right body 75% with inner tabs: Preview | Code */}
+              <div className="col-span-12 lg:col-span-9 space-y-4">
+                <Tabs defaultValue="preview">
+                  <TabsList>
+                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                    <TabsTrigger value="code">Code</TabsTrigger>
+                  </TabsList>
 
-            {/* Preview Tab */}
-            <TabsContent value="preview">
-              <Card className="mt-4 h-[60vh] grid place-items-center">
-                <CardContent className="p-6 text-center text-slate-500">
-                  <div className="text-sm">No page generated yet</div>
-                  <div className="text-xs mt-1">Start a conversation in the Agent tab to see your landing page here</div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </section>
+                  <TabsContent value="preview">
+                    <Card className="mt-4 h-[60vh] grid place-items-center">
+                      <CardContent className="p-6 text-center text-slate-500">
+                        <div className="text-sm">No page generated yet</div>
+                        <div className="text-xs mt-1">Start a conversation in the Agent tab to see your landing page here</div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="code">
+                    <Card className="mt-4">
+                      <CardContent className="p-4">
+                        {loading ? (
+                          <div className="space-y-2">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-4 w-2/3" />)}</div>
+                        ) : !project?.plan ? (
+                          <div className="text-sm text-slate-500">No plan yet. Send a message on the left to generate.</div>
+                        ) : (
+                          <div>
+                            <div className="text-sm font-medium mb-2">Plan Overview</div>
+                            <div className="text-xs text-slate-500 mb-4">Items • F:{counts.f} B:{counts.b} D:{counts.d}</div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <PlanColumn title="Frontend" items={project.plan.frontend || []} />
+                              <PlanColumn title="Backend" items={project.plan.backend || []} />
+                              <PlanColumn title="Database" items={project.plan.database || []} />
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Files Tab */}
+          <TabsContent value="files">
+            <Card className="mt-4">
+              <CardContent className="p-6">
+                <div className="text-sm text-slate-500">Files view coming soon.</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
