@@ -148,6 +148,7 @@ async def compare_providers(project_id: str):
     for provider, model in combos:
         plan, meta = await compute_plan(prj.description, provider, model)
         # store run record but do not update project
+        q, qd = score_plan(plan)
         run_doc = {
             "_id": str(uuid.uuid4()),
             "project_id": project_id,
@@ -160,6 +161,8 @@ async def compare_providers(project_id: str):
                 "backend": len(plan.backend or []),
                 "database": len(plan.database or []),
             },
+            "quality_score": q,
+            "quality_detail": qd,
             "created_at": datetime.utcnow(),
         }
         await db.runs.insert_one(run_doc)
