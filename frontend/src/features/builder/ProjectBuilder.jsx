@@ -67,10 +67,8 @@ export default function ProjectBuilder() {
   }, [id]);
 
   // Adjust models when providers change
-  useEffect(() => {
-    const allowed = getModelsForProvider(provider);
-    if (!allowed.includes(model)) setModel(allowed[0]);
-  }, [provider]);
+  // provider-only now; model auto-handled by backend
+
   useEffect(() => {
     const allowed = getModelsForProvider(homeProvider);
     if (!allowed.includes(homeModel)) setHomeModel(allowed[0]);
