@@ -47,15 +47,17 @@ export default function ChatHome() {
     return x.charAt(0).toUpperCase() + x.slice(1);
   }, [prompt]);
 
+  const navigate = useNavigate();
+
   const onCreateFromPrompt = async () => {
     if (!prompt.trim()) { toast("Type what you want to build"); return; }
     try {
       setCreating(true);
       const proj = await ProjectsAPI.create({ name: firstWordsName, description: prompt.trim() });
       toast.success("Project created");
-      // immediately trigger plan generation
+      // generate and navigate to project builder
       await ProjectsAPI.scaffold(proj.id, provider, model);
-      window.location.href = `/#/projects?open=${proj.id}`; // in case BrowserRouter fallback; Navigate not possible here
+      navigate(`/project/${proj.id}`);
     } catch (e) {
       console.error(e);
       toast.error("Failed to create from prompt");
