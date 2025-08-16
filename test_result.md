@@ -161,3 +161,5 @@
 ## agent_communication:
     -agent: "main"
     -message: "Please test backend first: /api/projects create, /api/projects/:id/scaffold, /api/projects/:id/runs should include quality_score. Auth endpoints if needed. After backend passes, I can run UI tests on request."
+    -agent: "testing"
+    -message: "✅ Backend testing completed successfully. All 7 tests passed including: 1) Health endpoint returns ok:true 2) Auth register + me with Bearer token works 3) Project creation returns UUID 4) Scaffold with claude/claude-4-sonnet updates status to planned and creates run record with quality_score 5) Runs list includes quality_score 6) Compare providers creates two run records with baseline/variants/diff structure. Quality score functionality is fully working. Backend is ready for production."
