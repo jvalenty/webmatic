@@ -213,18 +213,10 @@ export default function ProjectBuilder() {
                           <Textarea rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Ask to add auth, payments, testing…" />
                           <div className="flex items-center gap-2">
                             <Select value={provider} onValueChange={setProvider}>
-                              <SelectTrigger className="w-[120px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
+                              <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="claude">Claude</SelectItem>
                                 <SelectItem value="gpt">GPT</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Select value={model} onValueChange={setModel}>
-                              <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Model" /></SelectTrigger>
-                              <SelectContent>
-                                {getModelsForProvider(provider).map((m) => (
-                                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                                ))}
                               </SelectContent>
                             </Select>
                             <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={!authed || running}>{running ? "Generating…" : "Send"}</Button>
