@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Calendar } from "../../components/ui/calendar";
 import { Calendar as CalendarIcon, Rocket, Plus, RefreshCw, Scale } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import AuthBar from "../auth/AuthBar";
 
 const StatusBadge = ({ status }) => {
   const color = status === "planned" ? "bg-emerald-600" : status === "created" ? "bg-slate-700" : "bg-blue-600";
@@ -42,6 +43,7 @@ export default function ProjectsPage() {
   const [templates, setTemplates] = useState([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [templateNames, setTemplateNames] = useState({});
+  const [authed, setAuthed] = useState(false);
 
   // compare state
   const [compareOpen, setCompareOpen] = useState(false);
@@ -180,6 +182,7 @@ export default function ProjectsPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <AuthBar onAuthChange={(ok) => setAuthed(!!ok)} />
             <Link to="/templates">
               <Button variant="secondary" className="rounded-full">Templates</Button>
             </Link>
@@ -229,7 +232,7 @@ export default function ProjectsPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button onClick={createProject} disabled={creating} className="rounded-full bg-slate-900 hover:bg-slate-800">
+                  <Button onClick={createProject} disabled={creating || !authed} className="rounded-full bg-slate-900 hover:bg-slate-800">
                     <Plus size={16} className="mr-2" />Create
                   </Button>
                 </div>
@@ -287,7 +290,7 @@ export default function ProjectsPage() {
                             value={templateNames[tpl.id] || ""}
                             onChange={(e) => setTemplateNames((prev) => ({ ...prev, [tpl.id]: e.target.value }))}
                           />
-                          <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl)}>
+                          <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl)} disabled={!authed}>
                             Create from Template
                           </Button>
                         </div>
@@ -308,7 +311,7 @@ export default function ProjectsPage() {
               <div className="flex items-center gap-2">
                 <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="rounded-full" onClick={compareProviders} disabled={!selected}>
+                    <Button variant="outline" className="rounded-full" onClick={compareProviders} disabled={!selected || !authed}>
                       <Scale size={14} className="mr-2" />Compare Providers
                     </Button>
                   </DialogTrigger>
@@ -375,7 +378,7 @@ export default function ProjectsPage() {
                               <Button variant="outline" size="sm" className="rounded-full" onClick={(e) => { e.stopPropagation(); setSelected(p); }}>
                                 View
                               </Button>
-                              <Button size="sm" className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={(e) => { e.stopPropagation(); scaffold(p.id); }}>
+                              <Button size="sm" className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={(e) => { e.stopPropagation(); scaffold(p.id); }} disabled={!authed}>
                                 <RefreshCw size={14} className="mr-1" />Generate Plan
                               </Button>
                             </div>

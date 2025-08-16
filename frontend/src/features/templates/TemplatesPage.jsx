@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Toaster } from "../../components/ui/sonner";
 import { toast } from "sonner";
-import { Eye, Rocket, Plus, Trash } from "lucide-react";
+import { Eye, Rocket } from "lucide-react";
+import AuthBar from "../auth/AuthBar";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState([]);
@@ -22,6 +23,7 @@ export default function TemplatesPage() {
   const [preview, setPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [overridesDraftById, setOverridesDraftById] = useState({}); // id -> [{k, v}]
+  const [authed, setAuthed] = useState(false);
   const navigate = useNavigate();
 
   const getModelsForProvider = (prov) => {
@@ -116,6 +118,7 @@ export default function TemplatesPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <AuthBar onAuthChange={(ok) => setAuthed(!!ok)} />
             <Select value={provider} onValueChange={setProvider}>
               <SelectTrigger className="w-[160px] rounded-full">
                 <SelectValue placeholder="Provider" />
@@ -208,7 +211,7 @@ export default function TemplatesPage() {
                       value={nameById[tpl.id] || ""}
                       onChange={(e) => setNameById((prev) => ({ ...prev, [tpl.id]: e.target.value }))}
                     />
-                    <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl, false)}>
+                    <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={() => createFromTemplate(tpl, false)} disabled={!authed}>
                       <Rocket size={14} className="mr-2" />Create
                     </Button>
                   </div>
@@ -314,17 +317,17 @@ function TemplatePreview({ id, load, data, activeId, rowsFor, addRow, updateRow,
                   <Input placeholder="Key" value={row.k} onChange={(e) => updateRow(id, idx, 'k', e.target.value)} />
                   <Input placeholder="Value" value={row.v} onChange={(e) => updateRow(id, idx, 'v', e.target.value)} />
                   <Button variant="outline" className="rounded-full" onClick={() => removeRow(id, idx)}>
-                    <Trash size={14} />
+                    Remove
                   </Button>
                 </div>
               ))}
               <Button variant="outline" className="rounded-full" onClick={() => addRow(id)}>
-                <Plus size={14} className="mr-2" />Add parameter
+                Add parameter
               </Button>
             </div>
             <div className="mt-4">
               <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={onCreate}>
-                <Rocket size={14} className="mr-2" />Create with Overrides
+                Create with Overrides
               </Button>
             </div>
           </section>
