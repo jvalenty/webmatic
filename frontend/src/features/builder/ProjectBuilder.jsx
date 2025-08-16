@@ -260,9 +260,9 @@ export default function ProjectBuilder() {
                   <div className="h-full border border-slate-200 bg-white rounded-none flex flex-col">
                     <div className="px-4 py-2 border-b">
                       <Tabs defaultValue="preview">
-                        <TabsList>
-                          <TabsTrigger value="preview">Preview</TabsTrigger>
-                          <TabsTrigger value="code">Code</TabsTrigger>
+                        <TabsList className="border-b border-slate-200 rounded-none h-auto p-0 bg-transparent">
+                          <TabsTrigger value="preview" className="rounded-none px-3 py-2 h-auto border-b-2 border-transparent text-slate-600 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 hover:text-slate-800">Preview</TabsTrigger>
+                          <TabsTrigger value="code" className="rounded-none px-3 py-2 h-auto border-b-2 border-transparent text-slate-600 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 hover:text-slate-800">Code</TabsTrigger>
                         </TabsList>
                         <TabsContent value="preview">
                           <div className="h-[calc(100vh-300px)] grid place-items-center text-slate-500">
