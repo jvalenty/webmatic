@@ -9,6 +9,7 @@ load_dotenv(ROOT_BACKEND / ".env")
 MONGO_URL = os.environ.get("MONGO_URL")
 DB_NAME = os.environ.get("DB_NAME")
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "*").split(",")
+AUTH_SECRET = os.environ.get("AUTH_SECRET", "dev-secret-change-me")
 
 if not MONGO_URL:
     raise RuntimeError("MONGO_URL is not set in backend/.env")

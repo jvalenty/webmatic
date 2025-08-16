@@ -5,6 +5,7 @@ from app.core.config import CORS_ORIGINS, DB_NAME
 from app.core.db import close_db_client, db
 from app.projects.router import router as projects_router
 from app.templates.router import router as templates_router
+from app.auth.router import router as auth_router
 
 # FastAPI app and /api router
 app = FastAPI()
@@ -22,6 +23,7 @@ async def health():
 # Mount feature routers
 api_router.include_router(projects_router)
 api_router.include_router(templates_router)
+api_router.include_router(auth_router)
 
 # Include the /api router
 app.include_router(api_router)
