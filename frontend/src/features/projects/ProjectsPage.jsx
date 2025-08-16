@@ -467,6 +467,7 @@ export default function ProjectsPage() {
                                 <TableHead>Provider</TableHead>
                                 <TableHead>Mode</TableHead>
                                 <TableHead>Counts</TableHead>
+                                <TableHead>Score</TableHead>
                                 <TableHead>Status</TableHead>
                               </TableRow>
                             </TableHeader>
