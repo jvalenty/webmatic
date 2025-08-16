@@ -127,7 +127,7 @@ export default function ChatHome() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {projects.map((p) => (
-                <a key={p.id} href={`/#/project/${p.id}`} className="block group">
+                <Link key={p.id} to={`/project/${p.id}`} className="block group">
                   <Card className="border-slate-200 hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="text-sm font-medium line-clamp-1">{p.name}</div>
@@ -135,7 +135,7 @@ export default function ChatHome() {
                       <div className="text-[10px] mt-2 text-slate-500">{new Date(p.created_at).toLocaleDateString()}</div>
                     </CardContent>
                   </Card>
-                </a>
+                </Link>
               ))}
             </div>
           )}
