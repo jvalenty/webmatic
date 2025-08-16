@@ -34,7 +34,6 @@ export default function ProjectBuilder() {
   const [chat, setChat] = useState([]);
   const [msg, setMsg] = useState("");
   const [provider, setProvider] = useState("claude");
-  const [model, setModel] = useState("claude-4-sonnet");
   const [running, setRunning] = useState(false);
 
   // Home tab chat
