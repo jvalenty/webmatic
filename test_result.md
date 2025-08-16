@@ -101,3 +101,60 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+## user_problem_statement: Build a multi-tenant app with LLM-assisted project planning. Require login, create projects, generate plans, compare providers, and show run history. Add a quality score for each run. Root page should show centered chat entry and a 4xN project grid. In-project view should be a 25% chat / 75% output layout.
+
+## backend:
+  - task: "Add run quality score and expose in runs API"
+    implemented: true
+    working: true
+    file: "backend/app/projects/quality.py, backend/app/projects/router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Implemented heuristic scorer, persisted quality_score and included in runs listing and compare runs."
+
+## frontend:
+  - task: "Chat-first Home and Project Builder layout"
+    implemented: true
+    working: true
+    file: "frontend/src/features/builder/ChatHome.jsx, frontend/src/features/builder/ProjectBuilder.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "New centered chat on / with 4xN project grid; project builder with 25% chat / 75% plan output."
+  - task: "Show run quality score in Runs table"
+    implemented: true
+    working: true
+    file: "frontend/src/features/projects/ProjectsPage.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Added Score column rendering quality_score if present."
+
+## metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+## test_plan:
+  current_focus:
+    - "Backend health and runs endpoints after adding quality score"
+    - "Project create + scaffold flow from ChatHome"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+## agent_communication:
+    -agent: "main"
+    -message: "Please test backend first: /api/projects create, /api/projects/:id/scaffold, /api/projects/:id/runs should include quality_score. Auth endpoints if needed. After backend passes, I can run UI tests on request."
