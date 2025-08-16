@@ -165,7 +165,7 @@ export default function ProjectBuilder() {
                         <Textarea rows={4} value={homePrompt} onChange={(e) => setHomePrompt(e.target.value)} placeholder="Describe what you want to build" />
                         <div className="flex items-center gap-2">
                           <Select value={homeProvider} onValueChange={setHomeProvider}>
-                            <SelectTrigger className="w-[120px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
+                            <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="claude">Claude</SelectItem>
                               <SelectItem value="gpt">GPT</SelectItem>
