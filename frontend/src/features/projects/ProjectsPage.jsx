@@ -175,10 +175,9 @@ export default function ProjectsPage() {
       <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 grid place-items-center text-white shadow-md">WM</div>
+            <div className="h-9 w-9 rounded-xl bg-slate-900 grid place-items-center text-white shadow-md">Ξ</div>
             <div>
-              <h1 className="text-xl font-semibold tracking-tight">Webmatic.dev</h1>
-              <p className="text-xs text-slate-500">AI-powered full-stack app generator</p>
+              <h1 className="text-xl font-semibold tracking-tight">WΞBMΛTIC.dev</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
