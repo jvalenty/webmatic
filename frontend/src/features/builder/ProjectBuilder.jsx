@@ -171,14 +171,7 @@ export default function ProjectBuilder() {
                               <SelectItem value="gpt">GPT</SelectItem>
                             </SelectContent>
                           </Select>
-                          <Select value={homeModel} onValueChange={setHomeModel}>
-                            <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Model" /></SelectTrigger>
-                            <SelectContent>
-                              {getModelsForProvider(homeProvider).map((m) => (
-                                <SelectItem key={m} value={m}>{m}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+
                         </div>
                         <Button className="rounded-full bg-slate-900 hover:bg-slate-800 w-full" onClick={createFromHomePrompt} disabled={!authed || creating}>
                           {creating ? "Creating…" : "Start Building"}
