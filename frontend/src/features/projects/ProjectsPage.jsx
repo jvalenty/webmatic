@@ -478,6 +478,7 @@ export default function ProjectsPage() {
                                   <TableCell className="capitalize">{r.provider}</TableCell>
                                   <TableCell className="capitalize">{r.mode}</TableCell>
                                   <TableCell>{`F:${r?.plan_counts?.frontend || 0} • B:${r?.plan_counts?.backend || 0} • D:${r?.plan_counts?.database || 0}`}</TableCell>
+                                  <TableCell>{typeof r.quality_score === "number" ? <span className={r.quality_score >= 80 ? "text-emerald-600" : r.quality_score >= 60 ? "text-amber-600" : "text-slate-600"}>{r.quality_score}</span> : "—"}</TableCell>
                                   <TableCell>{r.status}</TableCell>
                                 </TableRow>
                               ))}
