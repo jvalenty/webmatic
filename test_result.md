@@ -152,7 +152,7 @@
 
 ## test_plan:
   current_focus:
-    - "Backend health and runs endpoints after adding quality score"
+    - "Backend health and runs endpoints after adding quality score" 
     - "Project create + scaffold flow from ChatHome"
   stuck_tasks: []
   test_all: false
