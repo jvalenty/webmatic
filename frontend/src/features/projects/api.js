@@ -1,14 +1,4 @@
-import axios from "axios";
-
-// Always use REACT_APP_BACKEND_URL and prefix /api per ingress rules
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-if (!BACKEND_URL) {
-  // eslint-disable-next-line no-console
-  console.warn("REACT_APP_BACKEND_URL is not set. API calls will fail.");
-}
-const api = axios.create({
-  baseURL: `${BACKEND_URL}/api`,
-});
+import { api } from "../../lib/api";
 
 export const ProjectsAPI = {
   async health() {
