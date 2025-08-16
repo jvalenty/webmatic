@@ -23,7 +23,6 @@ export default function AuthBar({ onAuthChange }) {
 
   useEffect(() => {
     fetchMe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onLogout = () => {
