@@ -125,13 +125,16 @@
     implemented: true
     working: true
     file: "frontend/src/features/builder/ChatHome.jsx, frontend/src/features/builder/ProjectBuilder.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
+        -working: false
+        -agent: "user"
+        -comment: "User reported chat window not responding."
         -working: true
         -agent: "main"
-        -comment: "New centered chat on / with 4xN project grid; project builder with 25% chat / 75% plan output."
+        -comment: "Updated to allow unauthenticated usage (nag), fixed provider-only scaffold calls, ensured bottom-aligned input."
   - task: "Show run quality score in Runs table"
     implemented: true
     working: true
