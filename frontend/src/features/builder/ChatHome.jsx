@@ -92,14 +92,7 @@ export default function ChatHome() {
                       <SelectItem value="gpt">GPT</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={model} onValueChange={setModel}>
-                    <SelectTrigger className="w-[180px] rounded-full"><SelectValue placeholder="Model" /></SelectTrigger>
-                    <SelectContent>
-                      {getModelsForProvider(provider).map((m) => (
-                        <SelectItem key={m} value={m}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
                   <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={onCreateFromPrompt} disabled={!authed || creating}>
                     {creating ? "Creating…" : "Start Building"}
                   </Button>
