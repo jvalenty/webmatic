@@ -86,7 +86,7 @@ export default function ChatHome() {
                 <div className="text-xs text-slate-500">Project name: <span className="font-medium text-slate-700">{firstWordsName}</span></div>
                 <div className="flex items-center gap-2">
                   <Select value={provider} onValueChange={setProvider}>
-                    <SelectTrigger className="w-[140px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
+                    <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="claude">Claude</SelectItem>
                       <SelectItem value="gpt">GPT</SelectItem>
