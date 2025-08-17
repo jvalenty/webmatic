@@ -127,7 +127,7 @@
     file: "frontend/src/features/builder/ChatHome.jsx, frontend/src/features/builder/ProjectBuilder.jsx"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: false
         -agent: "user"
@@ -135,6 +135,9 @@
         -working: true
         -agent: "main"
         -comment: "Updated to allow unauthenticated usage (nag), fixed provider-only scaffold calls, ensured bottom-aligned input."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE UI TEST PASSED: Home page shows correct WΞBMΛTIC.dev branding, centered textarea accepts prompts and updates project name preview, Start Building button successfully navigates to /project/:id. Project builder shows proper left column tabs (Home|Agent|Files) and right column tabs (Preview|Code). Agent tab chat textarea is functional, Send button correctly disabled for unauthenticated users (expected behavior). Drag functionality works for vertical split adjustment. Project switching via Home tab works with layout reset. All core builder flow functionality working as designed."
   - task: "Show run quality score in Runs table"
     implemented: true
     working: true
