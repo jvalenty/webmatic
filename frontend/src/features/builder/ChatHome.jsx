@@ -53,7 +53,7 @@ export default function ChatHome() {
       const proj = await ProjectsAPI.create({ name: firstWordsName, description: prompt.trim() });
       toast.success("Project created");
       // generate and navigate to project builder
-      await ProjectsAPI.scaffold(proj.id, provider, model);
+      await ProjectsAPI.scaffold(proj.id, provider);
       navigate(`/project/${proj.id}`);
     } catch (e) {
       console.error(e);
