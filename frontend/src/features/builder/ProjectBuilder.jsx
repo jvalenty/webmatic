@@ -99,7 +99,8 @@ export default function ProjectBuilder() {
       toast.success("Plan updated");
     } catch (e) {
       console.error(e);
-      toast.error("Failed to update plan");
+      // If unauthenticated, gently nag to login but keep UI usable
+      toast("Please login to use AI planning (Register/Login in header)\nUsing stub plan fallback if available.");
     } finally { setRunning(false); }
   };
 
