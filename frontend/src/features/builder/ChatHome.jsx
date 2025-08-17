@@ -35,10 +35,8 @@ export default function ChatHome() {
     load();
   }, []);
 
-  useEffect(() => {
-    const allowed = getModelsForProvider(provider);
-    if (!allowed.includes(model)) setModel(allowed[0]);
-  }, [provider]);
+  // provider-only selector; model is chosen server-side
+
 
   const firstWordsName = useMemo(() => {
     const x = prompt.trim().split(/\s+/).slice(0, 6).join(" ");
