@@ -20,7 +20,6 @@ export default function ChatHome() {
   const [loading, setLoading] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [provider, setProvider] = useState("claude");
-  const [model, setModel] = useState("claude-4-sonnet");
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
