@@ -150,7 +150,7 @@ export default function ProjectBuilder() {
         <div className="mt-0" style={{ height: "calc(100vh - 180px)" }}>
           <PanelGroup direction="horizontal">
             {/* Left column with its own tabs (Home | Agent | Files) */}
-            <Panel defaultSize={25} minSize={18} maxSize={50}>
+            <Panel key={id} defaultSize={25} minSize={18} maxSize={50}>
               <div className="h-full border border-slate-200 bg-white rounded-none flex flex-col">
                 <div className="px-3 pt-2 border-b">
                   <Tabs defaultValue="agent">
