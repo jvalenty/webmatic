@@ -93,7 +93,7 @@ export default function ChatHome() {
                     </SelectContent>
                   </Select>
 
-                  <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={onCreateFromPrompt} disabled={!authed || creating}>
+                  <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={onCreateFromPrompt} disabled={creating}>
                     {creating ? "Creating…" : "Start Building"}
                   </Button>
                 </div>
