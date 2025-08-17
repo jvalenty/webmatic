@@ -172,7 +172,7 @@ export default function ProjectBuilder() {
                           </Select>
 
                         </div>
-                        <Button className="rounded-full bg-slate-900 hover:bg-slate-800 w-full" onClick={createFromHomePrompt} disabled={!authed || creating}>
+                        <Button className="rounded-full bg-slate-900 hover:bg-slate-800 w-full" onClick={createFromHomePrompt} disabled={creating}>
                           {creating ? "Creating…" : "Start Building"}
                         </Button>
                         <div className="text-xs font-medium text-slate-600 pt-2">Your projects</div>
