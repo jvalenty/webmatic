@@ -9,6 +9,7 @@ root.render(
   <React.StrictMode>
     <>
       <App />
+      <Toaster position="top-right" richColors closeButton />
     </>
   </React.StrictMode>,
 );
