@@ -58,7 +58,7 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
     )
 
 
-async def compute_plan(description: str, provider: Optional[str], model: Optional[str]) -> Tuple[Plan, Dict[str, Any]]:
+async def compute_plan(description: str, provider: Optional[str], model: Optional[str], prompt: Optional[str] = None) -> Tuple[Plan, Dict[str, Any]]:
     """Return (plan, meta) where meta includes mode: ai|stub, provider, model, error (optional)."""
     try:
         plan = await plan_from_llm(description, provider, model)
