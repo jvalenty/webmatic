@@ -51,6 +51,8 @@ export default function ProjectBuilder() {
         setLoading(true);
         const p = await ProjectsAPI.get(id);
         setProject(p);
+        // Load artifacts into right panel on project switch
+        if (p?.artifacts?.html_preview) setRightTab("preview");
       } catch (e) { console.error(e);} finally { setLoading(false);} 
     };
     load();
