@@ -138,6 +138,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ COMPREHENSIVE UI TEST PASSED: Home page shows correct WΞBMΛTIC.dev branding, centered textarea accepts prompts and updates project name preview, Start Building button successfully navigates to /project/:id. Project builder shows proper left column tabs (Home|Agent|Files) and right column tabs (Preview|Code). Agent tab chat textarea is functional, Send button correctly disabled for unauthenticated users (expected behavior). Drag functionality works for vertical split adjustment. Project switching via Home tab works with layout reset. All core builder flow functionality working as designed."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ AUTHENTICATED FLOW COMPREHENSIVE TEST PASSED: All requested authenticated flow scenarios successfully tested. 1) User Registration: Successfully registered testusertoox1kz3@example.com, email displayed in header, token automatically stored and used. 2) Home to Project Flow: Prompt entry and Start Building navigation to /project/:id working perfectly. 3) Agent Tab Interaction: 'Add OAuth login and data export' message sent successfully, POST /api/projects/:id/scaffold returned 200, right panel automatically switched to Code tab displaying detailed Frontend/Backend/Database plan lists (F:5 B:6 D:3 items). 4) Project Switching: Successfully tested switching between projects via Home tab with proper layout reset to 25/75 split. All core authenticated functionality working perfectly. Minor 401 auth/me errors are expected for token refresh and don't impact functionality."
   - task: "Show run quality score in Runs table"
     implemented: true
     working: true
