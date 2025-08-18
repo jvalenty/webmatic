@@ -94,16 +94,18 @@ export default function ProjectBuilder() {
       setRunning(true);
       setBusy(true);
       setErrorMsg("");
-      // Only provider is sent; backend will choose model or use allowlist
-      const updated = await ProjectsAPI.scaffold(id, provider, newMsg.content);
-      setProject(updated);
-      setRightTab("code");
-      toast.success("Plan updated");
+      // Require auth for generation flow per your choice
+      await BuilderAPI.appendChat(id, newMsg);
+      const out = await BuilderAPI.generate(id, provider, newMsg.content);
+      // Attach artifacts to project in memory for display
+      setProject((p) => ({ ...(p || {}), artifacts: { files: out.files || [], html_preview: out.html_preview || "" } }));
+      setRightTab("preview");
+      toast.success("Generated");
     } catch (e) {
       console.error(e);
-      const msg = e?.response?.data?.detail || e?.message || "Failed to update plan";
+      const msg = e?.response?.data?.detail || e?.message || "Failed to generate";
       setErrorMsg(String(msg));
-      toast.error(`Scaffold failed: ${msg}`);
+      toast.error(`Generate failed: ${msg}`);
     } finally { setRunning(false); setBusy(false); }
   };
 
