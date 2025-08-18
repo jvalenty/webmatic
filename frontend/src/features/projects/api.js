@@ -32,3 +32,18 @@ export const ProjectsAPI = {
     return data;
   },
 };
+
+export const BuilderAPI = {
+  async getChat(id) {
+    const { data } = await api.get(`/projects/${id}/chat`);
+    return data;
+  },
+  async appendChat(id, message) {
+    const { data } = await api.post(`/projects/${id}/chat`, message);
+    return data;
+  },
+  async generate(id, provider, prompt) {
+    const { data } = await api.post(`/projects/${id}/generate`, { provider, prompt });
+    return data;
+  }
+};
