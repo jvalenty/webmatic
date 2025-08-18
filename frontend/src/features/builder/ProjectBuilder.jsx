@@ -36,6 +36,8 @@ export default function ProjectBuilder() {
   const [msg, setMsg] = useState("");
   const [provider, setProvider] = useState("claude");
   const [running, setRunning] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Home tab chat
   const [homePrompt, setHomePrompt] = useState("");
