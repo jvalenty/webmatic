@@ -73,7 +73,7 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
 
     prj = doc_to_project(doc)
 
-    plan, meta = await compute_plan(prj.description, provider, model)
+    plan, meta = await compute_plan(prj.description, provider, model, prompt)
     prj.plan = plan
     prj.status = "planned"
     prj.updated_at = datetime.utcnow()
