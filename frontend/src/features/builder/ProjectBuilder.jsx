@@ -276,7 +276,7 @@ export default function ProjectBuilder() {
                         <div className="col-span-4 border-r overflow-auto">
                           <ul className="text-xs">
                             {(project?.artifacts?.files || []).map((f, i) => (
-                              <li key={i} className="px-3 py-2 border-b truncate">{f.path}</li>
+                              <li key={i} onClick={() => setSelectedFile(i)} className={cn("px-3 py-2 border-b truncate cursor-pointer", selectedFile === i ? "bg-slate-100" : "hover:bg-slate-50")}>{f.path}</li>
                             ))}
                           </ul>
                         </div>
