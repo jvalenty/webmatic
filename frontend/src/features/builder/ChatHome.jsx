@@ -51,10 +51,14 @@ export default function ChatHome() {
     try {
       setCreating(true);
       const proj = await ProjectsAPI.create({ name: firstWordsName, description: prompt.trim() });
-      toast.success("Project created");
-      // generate and navigate to project builder
-      await ProjectsAPI.scaffold(proj.id, provider);
+      // Immediately navigate so the page can show scaffold progress
       navigate(`/project/${proj.id}`);
+      try {
+        await ProjectsAPI.scaffold(proj.id, provider);
+        toast.success("Plan generated");
+      } catch (err) {
+        toast("Please login to use AI planning (Register/Login in header)\nUsing stub plan fallback if available.");
+      }
     } catch (e) {
       console.error(e);
       toast.error("Failed to create from prompt");
