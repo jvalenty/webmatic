@@ -110,6 +110,8 @@ export default function ProjectBuilder() {
     d: project?.plan?.database?.length || 0,
   }), [project]);
 
+  const [rightTab, setRightTab] = useState("preview");
+
   const firstWordsName = useMemo(() => {
     const x = homePrompt.trim().split(/\s+/).slice(0, 6).join(" ");
     if (!x) return "Untitled Project";
