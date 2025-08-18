@@ -65,6 +65,7 @@ async def scaffold_project(project_id: str, payload: ScaffoldRequest | None = No
 
     provider = (payload.provider if payload else "auto") if payload else "auto"
     model = payload.model if payload else None
+    prompt = payload.prompt if payload else None
 
     if model and not is_allowed_model(model):
         logger.warning(f"Rejected unsupported model '{model}'. Allowed: {sorted(ALLOWED_MODELS)}")
