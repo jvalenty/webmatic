@@ -25,6 +25,7 @@ async def health():
 api_router.include_router(projects_router)
 api_router.include_router(templates_router)
 api_router.include_router(auth_router)
+api_router.include_router(generate_router)
 
 # Include the /api router
 app.include_router(api_router)
