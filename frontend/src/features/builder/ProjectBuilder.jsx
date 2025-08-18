@@ -284,7 +284,7 @@ export default function ProjectBuilder() {
                           {busy ? (<div className="text-xs text-slate-500">Generating…</div>) : null}
                           {errorMsg ? (<div className="text-xs text-red-600">{errorMsg}</div>) : null}
                           {project?.artifacts?.files?.length ? (
-                            <pre className="text-xs whitespace-pre-wrap">{project.artifacts.files[0].content}</pre>
+                            <pre className="text-xs whitespace-pre-wrap">{project.artifacts.files[selectedFile]?.content}</pre>
                           ) : (
                             <div className="text-xs text-slate-500">No files yet</div>
                           )}
