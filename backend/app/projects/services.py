@@ -61,8 +61,14 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
 async def compute_plan(description: str, provider: Optional[str], model: Optional[str], prompt: Optional[str] = None) -> Tuple[Plan, Dict[str, Any]]:
     """Return (plan, meta) where meta includes mode: ai|stub, provider, model, error (optional)."""
     try:
-        plan = await plan_from_llm(description, provider, model)
+        base_text = description
+        if prompt and prompt.strip():
+            base_text = f"{description}\nUser refinement: {prompt.strip()}"
+        plan = await plan_from_llm(base_text, provider, model)
         return plan, {"mode": "ai", "provider": (provider or "auto"), "model": model}
     except Exception as e:
-        plan = await compute_stub_plan(description)
+        base_text = description
+        if prompt and prompt.strip():
+            base_text = f"{description}\nUser refinement: {prompt.strip()}"
+        plan = await compute_stub_plan(base_text)
         return plan, {"mode": "stub", "provider": (provider or "auto"), "model": model, "error": str(e)}
