@@ -96,6 +96,7 @@ export default function ProjectBuilder() {
       // Only provider is sent; backend will choose model or use allowlist
       const updated = await ProjectsAPI.scaffold(id, provider);
       setProject(updated);
+      setRightTab("code");
       toast.success("Plan updated");
     } catch (e) {
       console.error(e);
