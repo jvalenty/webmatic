@@ -4,6 +4,7 @@ import logging
 from app.core.config import CORS_ORIGINS, DB_NAME
 from app.core.db import close_db_client, db
 from app.projects.router import router as projects_router
+from app.projects.router_generate import router as generate_router
 from app.templates.router import router as templates_router
 from app.auth.router import router as auth_router
 
