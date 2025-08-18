@@ -95,6 +95,8 @@ export default function ProjectBuilder() {
     setMsg("");
     try {
       setRunning(true);
+      setBusy(true);
+      setErrorMsg("");
       // Only provider is sent; backend will choose model or use allowlist
       const updated = await ProjectsAPI.scaffold(id, provider);
       setProject(updated);
@@ -102,9 +104,10 @@ export default function ProjectBuilder() {
       toast.success("Plan updated");
     } catch (e) {
       console.error(e);
-      // If unauthenticated, gently nag to login but keep UI usable
-      toast("Please login to use AI planning (Register/Login in header)\nUsing stub plan fallback if available.");
-    } finally { setRunning(false); }
+      const msg = e?.response?.data?.detail || e?.message || "Failed to update plan";
+      setErrorMsg(String(msg));
+      toast.error(`Scaffold failed: ${msg}`);
+    } finally { setRunning(false); setBusy(false); }
   };
 
   const counts = useMemo(() => ({
