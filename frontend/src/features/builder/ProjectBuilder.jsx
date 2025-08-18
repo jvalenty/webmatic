@@ -74,19 +74,16 @@ export default function ProjectBuilder() {
   // provider-only now for Home tab as well; model auto-handled by backend
 
 
-  // Agent: local chat persistence
+  // Load chat from backend when project changes
   useEffect(() => {
-    try {
-      const key = `chat_${id}`;
-      const saved = localStorage.getItem(key);
-      if (saved) setChat(JSON.parse(saved));
-    } catch {}
+    const loadChat = async () => {
+      try {
+        const data = await BuilderAPI.getChat(id);
+        setChat(data.messages || []);
+      } catch (e) { /* ignore */ }
+    };
+    loadChat();
   }, [id]);
-  useEffect(() => {
-    try {
-      localStorage.setItem(`chat_${id}`, JSON.stringify(chat));
-    } catch {}
-  }, [id, chat]);
 
   const send = async () => {
     if (!msg.trim()) return;
