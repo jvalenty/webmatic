@@ -266,6 +266,12 @@ export default function ProjectBuilder() {
 
                     <TabsContent value="code">
                       <div className="p-4 overflow-auto">
+                        {busy ? (
+                          <div className="text-xs text-slate-500">Generating plan…</div>
+                        ) : null}
+                        {errorMsg ? (
+                          <div className="text-xs text-red-600">{errorMsg}</div>
+                        ) : null}
                         {loading ? (
                           <div className="space-y-2">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-4 w-2/3" />)}</div>
                         ) : !project?.plan ? (
