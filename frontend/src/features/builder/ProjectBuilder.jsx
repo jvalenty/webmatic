@@ -255,37 +255,36 @@ export default function ProjectBuilder() {
                     </TabsList>
 
                     <TabsContent value="preview">
-                      <div className="h-[calc(100vh-300px)] grid place-items-center text-slate-500">
-                        <div>
-                          <div className="text-sm text-center">No page generated yet</div>
-                          <div className="text-xs text-center mt-1">Start a conversation in the Agent tab to see your landing page here</div>
+                      {project?.artifacts?.html_preview ? (
+                        <iframe title="preview" className="w-full" style={{ height: "calc(100vh - 300px)", border: "0" }} srcDoc={project.artifacts.html_preview} />
+                      ) : (
+                        <div className="h-[calc(100vh-300px)] grid place-items-center text-slate-500">
+                          <div>
+                            <div className="text-sm text-center">No page generated yet</div>
+                            <div className="text-xs text-center mt-1">Start a conversation in the Agent tab to see your landing page here</div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </TabsContent>
 
                     <TabsContent value="code">
-                      <div className="p-4 overflow-auto">
-                        {busy ? (
-                          <div className="text-xs text-slate-500">Generating plan…</div>
-                        ) : null}
-                        {errorMsg ? (
-                          <div className="text-xs text-red-600">{errorMsg}</div>
-                        ) : null}
-                        {loading ? (
-                          <div className="space-y-2">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-4 w-2/3" />)}</div>
-                        ) : !project?.plan ? (
-                          <div className="text-sm text-slate-500">No plan yet. Send a message on the left to generate.</div>
-                        ) : (
-                          <div>
-                            <div className="text-sm font-medium mb-2">Plan Overview</div>
-                            <div className="text-xs text-slate-500 mb-4">Items • F:{counts.f} B:{counts.b} D:{counts.d}</div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <PlanColumn title="Frontend" items={project.plan.frontend || []} />
-                              <PlanColumn title="Backend" items={project.plan.backend || []} />
-                              <PlanColumn title="Database" items={project.plan.database || []} />
-                            </div>
-                          </div>
-                        )}
+                      <div className="p-0 h-[calc(100vh-260px)] grid grid-cols-12">
+                        <div className="col-span-4 border-r overflow-auto">
+                          <ul className="text-xs">
+                            {(project?.artifacts?.files || []).map((f, i) => (
+                              <li key={i} className="px-3 py-2 border-b truncate">{f.path}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="col-span-8 overflow-auto p-4">
+                          {busy ? (<div className="text-xs text-slate-500">Generating…</div>) : null}
+                          {errorMsg ? (<div className="text-xs text-red-600">{errorMsg}</div>) : null}
+                          {project?.artifacts?.files?.length ? (
+                            <pre className="text-xs whitespace-pre-wrap">{project.artifacts.files[0].content}</pre>
+                          ) : (
+                            <div className="text-xs text-slate-500">No files yet</div>
+                          )}
+                        </div>
                       </div>
                     </TabsContent>
                   </Tabs>
