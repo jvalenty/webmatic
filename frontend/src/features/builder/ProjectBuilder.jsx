@@ -220,7 +220,7 @@ export default function ProjectBuilder() {
                                 <SelectItem value="gpt">GPT</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={!authed || running}>{running ? "Generating…" : "Send"}</Button>
+                            <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={running}>{running ? "Generating…" : "Send"}</Button>
                           </div>
                         </div>
                       </div>
