@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Tuple
 from datetime import datetime
-from .models import Plan, Project
+from .models import Plan, Project, Artifacts, ArtifactFile
 from ..llm.planner import plan_from_llm
 
 async def compute_stub_plan(description: str) -> Plan:
@@ -47,12 +47,18 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
             backend=plan_dict.get("backend", []),
             database=plan_dict.get("database", []),
         )
+    artifacts = None
+    if doc.get("artifacts"):
+        a = doc["artifacts"] or {}
+        files = [ArtifactFile(path=f.get("path", ""), content=f.get("content", "")) for f in (a.get("files") or [])]
+        artifacts = Artifacts(files=files, html_preview=a.get("html_preview"))
     return Project(
         id=str(pid),
         name=doc.get("name", "Unnamed"),
         description=doc.get("description", ""),
         status=doc.get("status", "created"),
         plan=plan,
+        artifacts=artifacts,
         created_at=doc.get("created_at", datetime.utcnow()),
         updated_at=doc.get("updated_at", datetime.utcnow()),
     )
