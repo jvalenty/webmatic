@@ -39,6 +39,7 @@ export default function ProjectBuilder() {
   const [running, setRunning] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [selectedFile, setSelectedFile] = useState(0);
 
   // Home tab chat
   const [homePrompt, setHomePrompt] = useState("");
