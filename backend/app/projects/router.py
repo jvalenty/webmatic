@@ -16,6 +16,7 @@ logger = logging.getLogger("webmatic")
 class ScaffoldRequest(BaseModel):
   provider: Optional[str] = "auto"  # "claude" | "gpt" | "auto"
   model: Optional[str] = None
+  prompt: Optional[str] = None
 
 @router.post("/projects", response_model=Project)
 async def create_project(payload: ProjectCreate):
