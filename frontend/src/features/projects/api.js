@@ -17,6 +17,10 @@ export const ProjectsAPI = {
     const { data } = await api.get(`/projects/${id}`);
     return data;
   },
+  async update(id, payload) {
+    const { data } = await api.patch(`/projects/${id}`, payload);
+    return data;
+  },
   async scaffold(id, provider, prompt) {
     const body = { provider };
     if (prompt && prompt.trim()) body.prompt = prompt.trim();

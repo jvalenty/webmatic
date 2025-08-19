@@ -18,6 +18,10 @@ class ScaffoldRequest(BaseModel):
   model: Optional[str] = None
   prompt: Optional[str] = None
 
+class ProjectUpdate(BaseModel):
+  name: Optional[str] = None
+  description: Optional[str] = None
+
 @router.post("/projects", response_model=Project)
 async def create_project(payload: ProjectCreate):
     project = Project(**payload.dict())
@@ -37,6 +41,22 @@ async def get_project(project_id: str):
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
     return doc_to_project(doc)
+
+@router.patch("/projects/{project_id}", response_model=Project)
+async def update_project(project_id: str, payload: ProjectUpdate):
+    doc = await db.projects.find_one({"_id": project_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+    updates: Dict[str, Any] = {}
+    if payload.name is not None:
+        updates["name"] = payload.name
+    if payload.description is not None:
+        updates["description"] = payload.description
+    if updates:
+        updates["updated_at"] = datetime.utcnow()
+        await db.projects.update_one({"_id": project_id}, {"$set": updates})
+    new_doc = await db.projects.find_one({"_id": project_id})
+    return doc_to_project(new_doc)
 
 @router.get("/projects/{project_id}/runs")
 async def list_runs(project_id: str) -> List[Dict[str, Any]]:
