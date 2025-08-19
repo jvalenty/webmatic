@@ -120,6 +120,7 @@ export default function ProjectBuilder() {
   }), [project]);
 
   const [rightTab, setRightTab] = useState("preview");
+  const [splitByProject, setSplitByProject] = useState({});
 
   const firstWordsName = useMemo(() => {
     const x = homePrompt.trim().split(/\s+/).slice(0, 6).join(" ");
