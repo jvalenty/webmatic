@@ -123,9 +123,9 @@
 ## frontend:
   - task: "Chat-first Home and Project Builder layout"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/features/builder/ChatHome.jsx, frontend/src/features/builder/ProjectBuilder.jsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -141,6 +141,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ AUTHENTICATED FLOW COMPREHENSIVE TEST PASSED: All requested authenticated flow scenarios successfully tested. 1) User Registration: Successfully registered testusertoox1kz3@example.com, email displayed in header, token automatically stored and used. 2) Home to Project Flow: Prompt entry and Start Building navigation to /project/:id working perfectly. 3) Agent Tab Interaction: 'Add OAuth login and data export' message sent successfully, POST /api/projects/:id/scaffold returned 200, right panel automatically switched to Code tab displaying detailed Frontend/Backend/Database plan lists (F:5 B:6 D:3 items). 4) Project Switching: Successfully tested switching between projects via Home tab with proper layout reset to 25/75 split. All core authenticated functionality working perfectly. Minor 401 auth/me errors are expected for token refresh and don't impact functionality."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ CRITICAL AUTHENTICATION FAILURE: Re-run testing revealed authentication system is fundamentally broken. 1) Auth Banner Missing: Send button is NOT disabled for unauthenticated users (should be disabled), no clear inline banner appears in Agent tab. 2) Registration Fails: Registration appears to complete but fails silently - user email never appears in header, tokens not stored. 3) Generate Flow Broken: POST /chat and /generate requests made but generate returns non-200 due to 'Missing token' error. 4) File Selection Untestable: Code tab shows 'Missing token' and 'No files yet' - cannot test file selection. 5) Project Switching: ✅ Works correctly. Core issue: Users can interact with UI but all backend operations fail with authentication errors."
   - task: "Show run quality score in Runs table"
     implemented: true
     working: true
