@@ -222,7 +222,12 @@ export default function ProjectBuilder() {
                           )}
                         </div>
                         <div className="border-t p-3 space-y-2">
-                          <Textarea rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Ask to add auth, payments, testing…" />
+                          {!authed ? (
+                            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded-none">
+                              Login is required to generate preview and code. Use the Login/Register buttons in the header.
+                            </div>
+                          ) : null}
+                          <Textarea rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Ask to add auth, payments, testing…" disabled={!authed} />
                           <div className="flex items-center gap-2">
                             <Select value={provider} onValueChange={setProvider}>
                               <SelectTrigger className="w-[160px] rounded-full"><SelectValue placeholder="Provider" /></SelectTrigger>
@@ -231,7 +236,7 @@ export default function ProjectBuilder() {
                                 <SelectItem value="gpt">GPT</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={running}>{running ? "Generating…" : "Send"}</Button>
+                            <Button className="rounded-full bg-slate-900 hover:bg-slate-800" onClick={send} disabled={!authed || running || !msg.trim()}>{running ? "Generating…" : "Send"}</Button>
                           </div>
                         </div>
                       </div>
