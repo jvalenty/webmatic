@@ -3,6 +3,12 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "../../components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { ProjectsAPI, BuilderAPI } from "../projects/api";
 import AuthBar from "../auth/AuthBar";
