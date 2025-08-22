@@ -51,13 +51,14 @@ export default function ChatHome() {
     try {
       setCreating(true);
       const proj = await ProjectsAPI.create({ name: firstWordsName, description: prompt.trim() });
-      // Immediately navigate so the page can show scaffold progress
+      // Immediately navigate, then trigger full generation (auth required)
       navigate(`/project/${proj.id}`);
       try {
-        await ProjectsAPI.scaffold(proj.id, provider);
-        toast.success("Plan generated");
+        await BuilderAPI.appendChat(proj.id, { role: "user", content: prompt.trim() });
+        await BuilderAPI.generate(proj.id, provider, prompt.trim());
+        toast.success("Preview generated");
       } catch (err) {
-        toast("Please login to use AI planning (Register/Login in header)\nUsing stub plan fallback if available.");
+        toast.error((err?.response?.data?.detail) || "Generation failed. Please login and try again.");
       }
     } catch (e) {
       console.error(e);
