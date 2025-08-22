@@ -82,7 +82,7 @@ export default function ChatHome() {
 
       <main className="w-full px-6 py-10">
         {/* Centered chat-like box */}
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <Card className="shadow-sm border-slate-200">
             <CardContent className="p-6 space-y-4">
               <div className="text-center text-sm text-slate-500">Describe what you want to build</div>
