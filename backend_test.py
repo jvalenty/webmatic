@@ -50,7 +50,7 @@ class WebmaticAPITester:
     def test_auth_register(self):
         """Test user registration"""
         payload = {
-            "email": f"testuser_{datetime.now().strftime('%Y%m%d_%H%M%S')}@example.com",
+            "email": self.test_email,
             "password": "SecurePass123!"
         }
         try:
@@ -64,7 +64,7 @@ class WebmaticAPITester:
                 data = response.json()
                 if "access_token" in data and data.get("token_type") == "bearer":
                     self.auth_token = data["access_token"]
-                    self.log_test("Auth Register", True, f"- Token received")
+                    self.log_test("Auth Register", True, f"- Token received for {self.test_email}")
                     return True
                 else:
                     self.log_test("Auth Register", False, f"- Invalid response: {data}")
