@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Webmatic.dev MVP
-Tests quality score functionality and core flows using the public URL
+Backend API Testing for Webmatic.dev MVP - CRITICAL LLM INTEGRATION TEST
+Tests the core chat and generation flow after LLM integration fix
 """
 
 import requests
@@ -9,6 +9,7 @@ import sys
 import json
 from datetime import datetime
 import os
+import time
 
 class WebmaticAPITester:
     def __init__(self):
@@ -18,6 +19,7 @@ class WebmaticAPITester:
         self.tests_passed = 0
         self.created_project_id = None
         self.auth_token = None
+        self.test_email = f"testuser_{datetime.now().strftime('%Y%m%d_%H%M%S')}@example.com"
 
     def log_test(self, name, success, details=""):
         """Log test results"""
