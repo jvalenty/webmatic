@@ -49,20 +49,31 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
             raise RuntimeError("LLM returned empty response")
         
         # Try to extract JSON even if provider adds prose or markdown code blocks
-        # First try to find JSON in markdown code blocks
-        m = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", content, re.IGNORECASE)
-        if m:
-            content = m.group(1)
-            print(f"DEBUG: Extracted JSON from markdown: {repr(content)}")
-        else:
-            # Fallback to finding JSON at the end
-            m = re.search(r"\{[\s\S]*\}$", content.strip())
+        # Look for JSON in any format - more permissive approach
+        json_match = None
+        
+        # Try markdown code blocks first
+        patterns = [
+            r"```(?:json)?\s*(\{[\s\S]*?\})\s*```",  # JSON in code blocks
+            r"```(?:json)?\s*(\{[\s\S]*?)\s*```",     # Relaxed code blocks
+            r"\{[\s\S]*\}",                           # Any JSON anywhere
+        ]
+        
+        for pattern in patterns:
+            m = re.search(pattern, content, re.IGNORECASE | re.DOTALL)
             if m:
-                content = m.group(0)
-                print(f"DEBUG: Extracted JSON from end: {repr(content)}")
-            else:
-                print(f"DEBUG: No JSON found in response: {repr(content)}")
-                raise RuntimeError(f"No JSON found in LLM response: {content[:200]}...")
+                if len(m.groups()) > 0:
+                    json_match = m.group(1)
+                else:
+                    json_match = m.group(0)
+                print(f"DEBUG: Found JSON with pattern: {repr(json_match[:100])}...")
+                break
+        
+        if json_match:
+            content = json_match.strip()
+        else:
+            print(f"DEBUG: No JSON found in response: {repr(content)}")
+            raise RuntimeError(f"No JSON found in LLM response: {content[:200]}...")
         
         data = json.loads(content)
         files = data.get("files", [])
