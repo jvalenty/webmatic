@@ -128,7 +128,42 @@ class WebmaticAPITester:
             self.log_test("Create Project", False, f"- Error: {str(e)}")
         return False
 
-    def test_scaffold_project(self):
+    def test_chat_message_persistence(self):
+        """Test chat message persistence: POST /api/projects/{id}/chat"""
+        if not self.created_project_id:
+            self.log_test("Chat Message Persistence", False, "- No project ID available")
+            return False
+        
+        try:
+            payload = {"content": "Create a modern homepage with hero section", "role": "user"}
+            response = requests.post(
+                f"{self.base_url}/projects/{self.created_project_id}/chat",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") is True:
+                    # Verify message was persisted by retrieving chat
+                    get_response = requests.get(f"{self.base_url}/projects/{self.created_project_id}/chat", timeout=10)
+                    if get_response.status_code == 200:
+                        chat_data = get_response.json()
+                        messages = chat_data.get("messages", [])
+                        if len(messages) > 0 and messages[-1].get("content") == payload["content"]:
+                            self.log_test("Chat Message Persistence", True, f"- Message persisted and retrieved")
+                            return True
+                        else:
+                            self.log_test("Chat Message Persistence", False, f"- Message not found in chat history")
+                    else:
+                        self.log_test("Chat Message Persistence", False, f"- Failed to retrieve chat: {get_response.status_code}")
+                else:
+                    self.log_test("Chat Message Persistence", False, f"- Invalid response: {data}")
+            else:
+                self.log_test("Chat Message Persistence", False, f"- Status: {response.status_code}, Body: {response.text}")
+        except Exception as e:
+            self.log_test("Chat Message Persistence", False, f"- Error: {str(e)}")
+        return False
         """Test project scaffolding with specific provider and model"""
         if not self.created_project_id:
             self.log_test("Scaffold Project", False, "- No project ID available")
