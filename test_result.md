@@ -172,9 +172,7 @@
   run_ui: true
 
 ## test_plan:
-  current_focus:
-    - "Fix LLM Integration and Chat Flow"
-    - "Test chat message persistence and generate endpoint" 
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
