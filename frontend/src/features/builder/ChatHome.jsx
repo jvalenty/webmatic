@@ -4,7 +4,7 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { toast } from "sonner";
-import { ProjectsAPI } from "../projects/api";
+import { ProjectsAPI, BuilderAPI } from "../projects/api";
 import AuthBar from "../auth/AuthBar";
 import { Link, useNavigate } from "react-router-dom";
 
