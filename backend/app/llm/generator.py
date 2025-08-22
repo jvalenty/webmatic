@@ -78,7 +78,6 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         if json_match:
             content = json_match.strip()
         else:
-            print(f"DEBUG: No JSON found in response: {repr(content)}")
             raise RuntimeError(f"No JSON found in LLM response: {content[:200]}...")
         # Try to parse JSON, with fallback handling for malformed responses
         try:
