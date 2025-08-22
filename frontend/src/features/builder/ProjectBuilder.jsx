@@ -167,7 +167,7 @@ export default function ProjectBuilder() {
       </header>
 
       {/* Body (no project sidebar) */}
-      <main className="max-w-7xl mx-auto px-6 py-6">
+      <main className="w-full px-6 py-6">
         <div className="mt-0" style={{ height: "calc(100vh - 180px)" }}>
           <PanelGroup direction="horizontal">
             {/* Left column with its own tabs (Home | Agent | Files) */}
