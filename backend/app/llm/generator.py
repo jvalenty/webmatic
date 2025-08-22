@@ -43,17 +43,26 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         
         # Extract content - response should be a string
         content = str(response).strip()
+        print(f"DEBUG: Raw LLM response: {repr(content)}")
+        
+        if not content:
+            raise RuntimeError("LLM returned empty response")
         
         # Try to extract JSON even if provider adds prose or markdown code blocks
         # First try to find JSON in markdown code blocks
         m = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", content, re.IGNORECASE)
         if m:
             content = m.group(1)
+            print(f"DEBUG: Extracted JSON from markdown: {repr(content)}")
         else:
             # Fallback to finding JSON at the end
             m = re.search(r"\{[\s\S]*\}$", content.strip())
             if m:
                 content = m.group(0)
+                print(f"DEBUG: Extracted JSON from end: {repr(content)}")
+            else:
+                print(f"DEBUG: No JSON found in response: {repr(content)}")
+                raise RuntimeError(f"No JSON found in LLM response: {content[:200]}...")
         
         data = json.loads(content)
         files = data.get("files", [])
