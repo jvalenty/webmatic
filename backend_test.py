@@ -323,20 +323,20 @@ class WebmaticAPITester:
         return False
 
     def run_all_tests(self):
-        """Run all backend tests focused on quality score and new flows"""
-        print("🚀 Starting Webmatic.dev Backend Quality Score Tests")
+        """Run all backend tests focused on CRITICAL LLM integration"""
+        print("🚀 CRITICAL LLM INTEGRATION TEST - Webmatic.dev Backend")
         print(f"📡 Testing against: {self.base_url}")
-        print("=" * 60)
+        print("🎯 Focus: Verify LLM integration fix and core chat/generation flow")
+        print("=" * 70)
 
-        # Test sequence based on review request
+        # Test sequence based on review request priorities
         tests = [
-            ("Health Check", self.test_health),
-            ("Auth Register", self.test_auth_register),
-            ("Auth Me with Bearer Token", self.test_auth_me),
-            ("Create Project with UUID", self.test_create_project),
-            ("Scaffold with Claude Provider", self.test_scaffold_project),
-            ("Runs List with Quality Score", self.test_runs_list_with_quality_score),
-            ("Compare Providers", self.test_compare_providers),
+            ("1. Health Check", self.test_health),
+            ("2. Auth Register", self.test_auth_register),
+            ("3. Auth Me with Bearer Token", self.test_auth_me),
+            ("4. Project Creation", self.test_create_project),
+            ("5. Chat Message Persistence", self.test_chat_message_persistence),
+            ("6. 🔥 CRITICAL: Code Generation LLM", self.test_code_generation_llm),
         ]
 
         for test_name, test_func in tests:
@@ -344,14 +344,16 @@ class WebmaticAPITester:
             test_func()
 
         # Summary
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 70)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed! Backend quality score functionality is working correctly.")
+            print("🎉 ALL CRITICAL TESTS PASSED! LLM integration is working correctly.")
+            print("✅ System should now generate real AI content instead of stubs.")
             return True
         else:
-            print("⚠️  Some tests failed. Check the logs above.")
+            print("⚠️  CRITICAL TESTS FAILED! LLM integration issues detected.")
+            print("❌ System may still be falling back to stub mode.")
             return False
 
 def main():
