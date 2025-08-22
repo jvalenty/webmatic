@@ -227,6 +227,16 @@ export default function ProjectBuilder() {
                             chat.map((m, i) => (
                               <div key={i} className={"text-sm " + (m.role === "user" ? "text-slate-800" : "text-slate-600")}>
                                 {m.content}
+                    <div className="px-4 py-2 border-b flex items-center justify-between">
+                      <Tabs value={rightTab} onValueChange={setRightTab}>
+                        <TabsList className="border-b border-slate-200 rounded-none h-auto p-0 bg-transparent sticky top-0 bg-white z-10">
+                          <TabsTrigger value="preview" className="rounded-none px-3 py-2 h-auto border-b-2 border-transparent text-slate-600 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 hover:text-slate-800">Preview</TabsTrigger>
+                          <TabsTrigger value="code" className="rounded-none px-3 py-2 h-auto border-b-2 border-transparent text-slate-600 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 hover:text-slate-800">Code</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                      <div className="text-[10px] uppercase tracking-wide text-slate-500">{project?.artifacts?.mode === "ai" ? "AI" : project?.artifacts?.mode === "stub" ? "STUB" : ""}</div>
+                    </div>
+
                               </div>
                             ))
                           )}
