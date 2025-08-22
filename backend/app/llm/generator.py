@@ -82,13 +82,35 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         else:
             print(f"DEBUG: No JSON found in response: {repr(content)}")
             raise RuntimeError(f"No JSON found in LLM response: {content[:200]}...")
-        
-        data = json.loads(content)
-        files = data.get("files", [])
-        html_preview = data.get("html_preview", "")
-        if not isinstance(files, list):
-            files = []
-        return {"files": files, "html_preview": html_preview}
+        # Try to parse JSON, with fallback handling for malformed responses
+        try:
+            data = json.loads(content)
+            files = data.get("files", [])
+            html_preview = data.get("html_preview", "")
+            if not isinstance(files, list):
+                files = []
+            print(f"DEBUG: Successfully parsed JSON with {len(files)} files")
+            return {"files": files, "html_preview": html_preview}
+        except json.JSONDecodeError as e:
+            print(f"DEBUG: JSON parsing failed: {e}")
+            print(f"DEBUG: Problematic JSON content: {repr(content[:500])}...")
+            # Try to fix common JSON issues
+            try:
+                # Remove incomplete strings at the end
+                lines = content.split('\n')
+                for i in range(len(lines) - 1, -1, -1):
+                    test_content = '\n'.join(lines[:i+1])
+                    if test_content.rstrip().endswith('}'):
+                        data = json.loads(test_content)
+                        files = data.get("files", [])
+                        html_preview = data.get("html_preview", "")
+                        if not isinstance(files, list):
+                            files = []
+                        print(f"DEBUG: Fixed JSON parsing with {len(files)} files")
+                        return {"files": files, "html_preview": html_preview}
+            except:
+                pass
+            raise RuntimeError(f"Failed to parse LLM JSON response: {e}")
     except Exception as e:
         raise RuntimeError(f"LLM generation error: {e}")
 
