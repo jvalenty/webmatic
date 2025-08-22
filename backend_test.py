@@ -10,6 +10,7 @@ import json
 from datetime import datetime
 import os
 import time
+import uuid
 
 class WebmaticAPITester:
     def __init__(self):
