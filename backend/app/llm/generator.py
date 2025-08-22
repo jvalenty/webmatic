@@ -86,11 +86,8 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
             html_preview = data.get("html_preview", "")
             if not isinstance(files, list):
                 files = []
-            print(f"DEBUG: Successfully parsed JSON with {len(files)} files")
             return {"files": files, "html_preview": html_preview}
         except json.JSONDecodeError as e:
-            print(f"DEBUG: JSON parsing failed: {e}")
-            print(f"DEBUG: Problematic JSON content: {repr(content[:500])}...")
             # Try to fix common JSON issues
             try:
                 # Remove incomplete strings at the end
@@ -103,7 +100,6 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
                         html_preview = data.get("html_preview", "")
                         if not isinstance(files, list):
                             files = []
-                        print(f"DEBUG: Fixed JSON parsing with {len(files)} files")
                         return {"files": files, "html_preview": html_preview}
             except:
                 pass
