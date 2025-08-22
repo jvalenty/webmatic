@@ -449,10 +449,10 @@ class WebmaticAPITester:
         return False
 
     def run_all_tests(self):
-        """Run all backend tests focused on CRITICAL LLM integration"""
-        print("🚀 CRITICAL LLM INTEGRATION TEST - Webmatic.dev Backend")
+        """Run all backend tests including new DELETE endpoint tests"""
+        print("🚀 DELETE ENDPOINT TEST - Webmatic.dev Backend")
         print(f"📡 Testing against: {self.base_url}")
-        print("🎯 Focus: Verify LLM integration fix and core chat/generation flow")
+        print("🎯 Focus: Test new DELETE /api/projects/{id} endpoint functionality")
         print("=" * 70)
 
         # Test sequence based on review request priorities
@@ -462,7 +462,10 @@ class WebmaticAPITester:
             ("3. Auth Me with Bearer Token", self.test_auth_me),
             ("4. Project Creation", self.test_create_project),
             ("5. Chat Message Persistence", self.test_chat_message_persistence),
-            ("6. 🔥 CRITICAL: Code Generation LLM", self.test_code_generation_llm),
+            ("6. Code Generation LLM", self.test_code_generation_llm),
+            ("7. 🔥 NEW: Delete Project Success", self.test_delete_project_success),
+            ("8. 🔥 NEW: Delete Nonexistent Project (404)", self.test_delete_nonexistent_project),
+            ("9. 🔥 NEW: Data Cleanup Verification", self.test_data_cleanup_verification),
         ]
 
         for test_name, test_func in tests:
@@ -474,12 +477,12 @@ class WebmaticAPITester:
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 ALL CRITICAL TESTS PASSED! LLM integration is working correctly.")
-            print("✅ System should now generate real AI content instead of stubs.")
+            print("🎉 ALL DELETE ENDPOINT TESTS PASSED! Project deletion functionality is working correctly.")
+            print("✅ DELETE /api/projects/{id} successfully removes projects and cleans up related data.")
             return True
         else:
-            print("⚠️  CRITICAL TESTS FAILED! LLM integration issues detected.")
-            print("❌ System may still be falling back to stub mode.")
+            print("⚠️  DELETE ENDPOINT TESTS FAILED! Project deletion issues detected.")
+            print("❌ DELETE functionality may not be working as expected.")
             return False
 
 def main():
