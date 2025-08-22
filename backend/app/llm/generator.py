@@ -52,6 +52,10 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
     try:
         resp = await client.chat(**kwargs)
         content = resp.content if isinstance(resp.content, str) else str(resp.content)
+        # Try to extract JSON even if provider adds prose
+        m = re.search(r"\{[\s\S]*\}$", content.strip())
+        if m:
+            content = m.group(0)
         data = json.loads(content)
         files = data.get("files", [])
         html_preview = data.get("html_preview", "")
