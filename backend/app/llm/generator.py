@@ -15,9 +15,11 @@ def _build_user_prompt(description: str, chat_text: str) -> str:
     if chat_text.strip():
         base += f"Recent Chat:\n{chat_text.strip()}\n\n"
     base += (
-        "Generate a minimal working set of files and an html_preview that reflects the latest request. "
-        "Prefer vanilla HTML/CSS and minimal JS unless explicitly asked. "
-        "Return ONLY valid JSON format with no extra text or explanations."
+        "Generate ONLY a simple JSON response with exactly 2 keys:\n"
+        "1. 'files': array with 1 object containing 'path' and 'content'\n"
+        "2. 'html_preview': complete HTML document\n\n"
+        "Keep the HTML simple and concise. Make it modern and responsive.\n"
+        "IMPORTANT: Return ONLY the JSON, no explanations, no markdown blocks, no extra text."
     )
     return base
 
