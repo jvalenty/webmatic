@@ -51,7 +51,7 @@ def doc_to_project(doc: Dict[str, Any]) -> Project:
     if doc.get("artifacts"):
         a = doc["artifacts"] or {}
         files = [ArtifactFile(path=f.get("path", ""), content=f.get("content", "")) for f in (a.get("files") or [])]
-        artifacts = Artifacts(files=files, html_preview=a.get("html_preview"))
+        artifacts = Artifacts(files=files, html_preview=a.get("html_preview"), mode=a.get("mode"))
     return Project(
         id=str(pid),
         name=doc.get("name", "Unnamed"),

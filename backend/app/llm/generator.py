@@ -10,6 +10,12 @@ SYSTEM = (
     "No prose, no explanations."
 )
 
+_PROVIDER_MAP = {
+    "auto": ("auto", None),
+    "claude": ("anthropic", "claude-4-sonnet"),
+    "gpt": ("openai", "gpt-5"),
+}
+
 
 def _build_user_prompt(description: str, chat_text: str) -> str:
     base = f"Project Description:\n{description.strip()}\n\n"
@@ -29,8 +35,10 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
     chat_text = "\n".join([f"{m.get('role')}: {m.get('content')}" for m in chat_messages][-10:])
     user = _build_user_prompt(description, chat_text)
 
+    prov_key, model = _PROVIDER_MAP.get((provider or "auto").lower(), ("auto", None))
+
     kwargs = {
-        "provider": {"auto": "auto", "claude": "anthropic", "gpt": "openai"}.get((provider or "auto"), "auto"),
+        "provider": prov_key,
         "messages": [
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": user},
@@ -38,6 +46,8 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         "max_tokens": 1800,
         "temperature": 0.2,
     }
+    if model:
+        kwargs["model"] = model
     try:
         resp = await client.chat(**kwargs)
         content = resp.content if isinstance(resp.content, str) else str(resp.content)

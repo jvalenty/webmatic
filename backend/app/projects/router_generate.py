@@ -69,12 +69,15 @@ async def generate_project_output(project_id: str, request: Request, payload: Ge
     prj = doc_to_project(doc)
 
     # Try LLM, fallback to stub
+    mode = "ai"
+    error = None
     try:
         out = await generate_code_from_llm(prj.description, messages, payload.provider)
         mode = "ai"
     except Exception as e:
         out = stub_generate_code(prj.description, messages)
         mode = "stub"
+        error = str(e)
 
     files = out.get("files", [])
     html_preview = out.get("html_preview", "")
@@ -82,7 +85,7 @@ async def generate_project_output(project_id: str, request: Request, payload: Ge
     # Persist artifacts on project doc
     await db.projects.update_one(
         {"_id": project_id},
-        {"$set": {"artifacts": {"files": files, "html_preview": html_preview}, "status": "generated", "updated_at": datetime.utcnow()}},
+        {"$set": {"artifacts": {"files": files, "html_preview": html_preview, "mode": mode}, "status": "generated", "updated_at": datetime.utcnow()}},
     )
 
     # Record a run
@@ -94,8 +97,9 @@ async def generate_project_output(project_id: str, request: Request, payload: Ge
         "mode": mode,
         "status": "success",
         "artifact_counts": {"files": len(files)},
+        "error": error,
         "created_at": datetime.utcnow(),
     }
     await db.runs.insert_one(run)
 
-    return {"files": files, "html_preview": html_preview}
+    return {"files": files, "html_preview": html_preview, "mode": mode, "error": error}

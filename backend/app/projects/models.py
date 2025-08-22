@@ -15,6 +15,7 @@ class ArtifactFile(BaseModel):
 class Artifacts(BaseModel):
     files: List[ArtifactFile] = []
     html_preview: Optional[str] = None
+    mode: Optional[str] = None  # "ai" | "stub"
 
 class ProjectBase(BaseModel):
     name: str
