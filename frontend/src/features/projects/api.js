@@ -21,6 +21,10 @@ export const ProjectsAPI = {
     const { data } = await api.patch(`/projects/${id}`, payload);
     return data;
   },
+  async delete(id) {
+    const { data } = await api.delete(`/projects/${id}`);
+    return data;
+  },
   async scaffold(id, provider, prompt) {
     const body = { provider };
     if (prompt && prompt.trim()) body.prompt = prompt.trim();
