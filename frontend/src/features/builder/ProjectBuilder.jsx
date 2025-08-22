@@ -147,8 +147,16 @@ export default function ProjectBuilder() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/" className="h-9 w-9 rounded-xl bg-slate-900 grid place-items-center text-white shadow-md">Ξ</Link>
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight">WΞBMΛTIC.dev</h1>
+            <div className="flex items-center gap-3">
+              <Input
+                value={project?.name || ""}
+                onChange={(e) => setProject((p) => ({ ...(p || {}), name: e.target.value }))}
+                onBlur={async (e) => {
+                  try { await ProjectsAPI.update(id, { name: e.target.value }); toast.success("Renamed"); } catch { toast.error("Rename failed"); }
+                }}
+                className="h-8 rounded-none border-slate-300 text-sm w-[280px]"
+              />
+              <div className="text-xs text-slate-500">WΞBMΛTIC.dev</div>
             </div>
           </div>
           <div className="flex items-center gap-4">
