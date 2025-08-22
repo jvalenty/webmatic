@@ -73,7 +73,6 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
                     json_match = m.group(1)
                 else:
                     json_match = m.group(0)
-                print(f"DEBUG: Found JSON with pattern: {repr(json_match[:100])}...")
                 break
         
         if json_match:
