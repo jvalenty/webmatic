@@ -72,14 +72,9 @@ async def generate_project_output(project_id: str, request: Request, payload: Ge
     mode = "ai"
     error = None
     try:
-        print(f"DEBUG: Attempting LLM generation for project {project_id} with provider {payload.provider}")
         out = await generate_code_from_llm(prj.description, messages, payload.provider)
         mode = "ai"
-        print(f"DEBUG: LLM generation successful, got {len(out.get('files', []))} files")
     except Exception as e:
-        print(f"DEBUG: LLM generation failed: {e}")
-        import traceback
-        traceback.print_exc()
         out = stub_generate_code(prj.description, messages)
         mode = "stub"
         error = str(e)
