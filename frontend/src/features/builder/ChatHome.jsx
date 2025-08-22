@@ -119,7 +119,7 @@ export default function ChatHome() {
           ) : projects.length === 0 ? (
             <div className="text-sm text-slate-500">No projects yet. Start by describing what you want to build above.</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               {projects.map((p) => (
                 <Link key={p.id} to={`/project/${p.id}`} className="block group">
                   <Card className="border-slate-200 hover:shadow-md transition-shadow">
