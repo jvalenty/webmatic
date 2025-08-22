@@ -323,6 +323,131 @@ class WebmaticAPITester:
             self.log_test("Compare Providers", False, f"- Error: {str(e)}")
         return False
 
+    def test_delete_project_success(self):
+        """Test DELETE /api/projects/{id} - successful deletion"""
+        if not self.created_project_id:
+            self.log_test("Delete Project Success", False, "- No project ID available")
+            return False
+        
+        try:
+            # First verify project exists
+            get_response = requests.get(f"{self.base_url}/projects/{self.created_project_id}", timeout=10)
+            if get_response.status_code != 200:
+                self.log_test("Delete Project Success", False, f"- Project doesn't exist before deletion: {get_response.status_code}")
+                return False
+            
+            # Delete the project
+            response = requests.delete(f"{self.base_url}/projects/{self.created_project_id}", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") is True and "message" in data:
+                    # Verify project no longer exists
+                    verify_response = requests.get(f"{self.base_url}/projects/{self.created_project_id}", timeout=10)
+                    if verify_response.status_code == 404:
+                        self.log_test("Delete Project Success", True, 
+                                    f"- Project deleted successfully, returns 404 on subsequent GET")
+                        return True
+                    else:
+                        self.log_test("Delete Project Success", False, 
+                                    f"- Project still exists after deletion: {verify_response.status_code}")
+                else:
+                    self.log_test("Delete Project Success", False, f"- Invalid response: {data}")
+            else:
+                self.log_test("Delete Project Success", False, f"- Status: {response.status_code}, Body: {response.text}")
+        except Exception as e:
+            self.log_test("Delete Project Success", False, f"- Error: {str(e)}")
+        return False
+
+    def test_delete_nonexistent_project(self):
+        """Test DELETE /api/projects/{id} - non-existent project returns 404"""
+        fake_project_id = str(uuid.uuid4())
+        
+        try:
+            response = requests.delete(f"{self.base_url}/projects/{fake_project_id}", timeout=10)
+            if response.status_code == 404:
+                self.log_test("Delete Nonexistent Project", True, 
+                            f"- Correctly returns 404 for non-existent project")
+                return True
+            else:
+                self.log_test("Delete Nonexistent Project", False, 
+                            f"- Expected 404, got {response.status_code}: {response.text}")
+        except Exception as e:
+            self.log_test("Delete Nonexistent Project", False, f"- Error: {str(e)}")
+        return False
+
+    def test_data_cleanup_verification(self):
+        """Test that related chats and runs are cleaned up after project deletion"""
+        # Create a new project for this test since we deleted the previous one
+        payload = {
+            "name": "Cleanup Test Project",
+            "description": "Test project for verifying data cleanup"
+        }
+        
+        try:
+            # Create project
+            response = requests.post(
+                f"{self.base_url}/projects",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            if response.status_code != 200:
+                self.log_test("Data Cleanup Verification", False, f"- Failed to create test project: {response.status_code}")
+                return False
+            
+            test_project_id = response.json()["id"]
+            
+            # Add a chat message to create related data
+            chat_payload = {"content": "Test message for cleanup", "role": "user"}
+            chat_response = requests.post(
+                f"{self.base_url}/projects/{test_project_id}/chat",
+                json=chat_payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            
+            # Create a run by scaffolding (this creates run data)
+            scaffold_payload = {"provider": "claude", "model": "claude-4-sonnet"}
+            scaffold_response = requests.post(
+                f"{self.base_url}/projects/{test_project_id}/scaffold",
+                json=scaffold_payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
+            
+            # Verify chat and runs exist before deletion
+            chat_get = requests.get(f"{self.base_url}/projects/{test_project_id}/chat", timeout=10)
+            runs_get = requests.get(f"{self.base_url}/projects/{test_project_id}/runs", timeout=10)
+            
+            chat_exists_before = chat_get.status_code == 200 and len(chat_get.json().get("messages", [])) > 0
+            runs_exist_before = runs_get.status_code == 200 and len(runs_get.json()) > 0
+            
+            # Delete the project
+            delete_response = requests.delete(f"{self.base_url}/projects/{test_project_id}", timeout=10)
+            if delete_response.status_code != 200:
+                self.log_test("Data Cleanup Verification", False, f"- Failed to delete project: {delete_response.status_code}")
+                return False
+            
+            # Verify related data is cleaned up
+            chat_get_after = requests.get(f"{self.base_url}/projects/{test_project_id}/chat", timeout=10)
+            runs_get_after = requests.get(f"{self.base_url}/projects/{test_project_id}/runs", timeout=10)
+            
+            # Chat and runs endpoints should return empty or 404 after project deletion
+            chat_cleaned = chat_get_after.status_code == 404 or (chat_get_after.status_code == 200 and len(chat_get_after.json().get("messages", [])) == 0)
+            runs_cleaned = runs_get_after.status_code == 200 and len(runs_get_after.json()) == 0
+            
+            if chat_cleaned and runs_cleaned:
+                self.log_test("Data Cleanup Verification", True, 
+                            f"- Related data cleaned up successfully (chat: {chat_exists_before}→cleaned, runs: {runs_exist_before}→cleaned)")
+                return True
+            else:
+                self.log_test("Data Cleanup Verification", False, 
+                            f"- Data cleanup failed (chat cleaned: {chat_cleaned}, runs cleaned: {runs_cleaned})")
+                
+        except Exception as e:
+            self.log_test("Data Cleanup Verification", False, f"- Error: {str(e)}")
+        return False
+
     def run_all_tests(self):
         """Run all backend tests focused on CRITICAL LLM integration"""
         print("🚀 CRITICAL LLM INTEGRATION TEST - Webmatic.dev Backend")
