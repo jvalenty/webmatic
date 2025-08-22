@@ -80,7 +80,7 @@ export default function ChatHome() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="w-full px-6 py-10">
         {/* Centered chat-like box */}
         <div className="max-w-3xl mx-auto">
           <Card className="shadow-sm border-slate-200">
