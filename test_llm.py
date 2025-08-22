@@ -13,15 +13,21 @@ async def test_llm():
     
     print("✅ LLM client created successfully")
     
+    print(f"Client methods: {[m for m in dir(client) if not m.startswith('_')]}")
+    
     try:
-        response = await client.chat(
-            provider="anthropic",
-            model="claude-4-sonnet",
-            messages=[{"role": "user", "content": "Say hello in JSON format: {\"message\": \"your response\"}"}],
-            max_tokens=100,
-            temperature=0.1
-        )
-        print(f"✅ LLM response: {response.content}")
+        # Try different method names
+        if hasattr(client, 'get_response'):
+            response = await client.get_response("Say hello in JSON format")
+        elif hasattr(client, 'send_message'):
+            response = await client.send_message("Say hello in JSON format")
+        elif hasattr(client, 'complete'):
+            response = await client.complete("Say hello in JSON format")
+        else:
+            print("❌ No suitable method found")
+            return
+            
+        print(f"✅ LLM response: {response}")
     except Exception as e:
         print(f"❌ LLM error: {e}")
 
