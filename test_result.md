@@ -105,20 +105,20 @@
 ## user_problem_statement: Build a multi-tenant app with LLM-assisted project planning. Require login, create projects, generate plans, compare providers, and show run history. Add a quality score for each run. Root page should show centered chat entry and a 4xN project grid. In-project view should be a 25% chat / 75% output layout.
 
 ## backend:
-  - task: "Add run quality score and expose in runs API"
+  - task: "Fix LLM Integration and Chat Flow"
     implemented: true
-    working: true
-    file: "backend/app/projects/quality.py, backend/app/projects/router.py"
-    stuck_count: 0
+    working: false
+    file: "backend/app/llm/generator.py, backend/app/llm/client.py"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
+        -working: false
+        -agent: "user"
+        -comment: "Complete system breakdown - no chat, no preview, only stubs working"
         -working: true
         -agent: "main"
-        -comment: "Implemented heuristic scorer, persisted quality_score and included in runs listing and compare runs."
-        -working: true
-        -agent: "testing"
-        -comment: "✅ All backend tests passed: Health endpoint returns ok:true, Auth flow (register + me with Bearer token) works, Project creation with UUID works, Scaffold with claude/claude-4-sonnet updates status to planned and creates run with quality_score (63), Runs list includes quality_score, Compare providers creates baseline/variants/diff structure with two run records. Quality scoring system fully functional."
+        -comment: "Fixed emergentintegrations usage - updated to use UserMessage and send_message method with proper model configuration. Updated JSON parsing to handle markdown code blocks."
 
 ## frontend:
   - task: "Chat-first Home and Project Builder layout"
