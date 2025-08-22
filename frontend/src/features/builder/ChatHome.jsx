@@ -72,6 +72,24 @@ export default function ChatHome() {
     } finally { setCreating(false); }
   };
 
+  const onDeleteProject = async (e, projectId, projectName) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!window.confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await ProjectsAPI.delete(projectId);
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      toast.success("Project deleted successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete project");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[hsl(210,20%,98%)]">
       <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-slate-200">
