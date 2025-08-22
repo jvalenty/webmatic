@@ -145,15 +145,43 @@ export default function ChatHome() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               {projects.map((p) => (
-                <Link key={p.id} to={`/project/${p.id}`} className="block group">
-                  <Card className="border-slate-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="text-sm font-medium line-clamp-1">{p.name}</div>
-                      <div className="text-xs text-slate-500 line-clamp-2 mt-1">{p.description}</div>
-                      <div className="text-[10px] mt-2 text-slate-500">{new Date(p.created_at).toLocaleDateString()}</div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <div key={p.id} className="group relative">
+                  <Link to={`/project/${p.id}`} className="block">
+                    <Card className="border-slate-200 hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="text-sm font-medium line-clamp-1">{p.name}</div>
+                        <div className="text-xs text-slate-500 line-clamp-2 mt-1">{p.description}</div>
+                        <div className="text-[10px] mt-2 text-slate-500">{new Date(p.created_at).toLocaleDateString()}</div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  
+                  {/* Three-dot menu */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0 hover:bg-slate-100"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                          </svg>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-32">
+                        <DropdownMenuItem 
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                          onClick={(e) => onDeleteProject(e, p.id, p.name)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
               ))}
             </div>
           )}
