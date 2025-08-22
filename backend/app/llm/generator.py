@@ -1,6 +1,7 @@
 import json
 from typing import Optional, Dict, Any, List
 from .client import get_llm_client
+import re
 
 SYSTEM = (
     "You are an expert full-stack code generator. Given a product description and recent chat, "
