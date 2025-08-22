@@ -164,7 +164,64 @@ class WebmaticAPITester:
         except Exception as e:
             self.log_test("Chat Message Persistence", False, f"- Error: {str(e)}")
         return False
-        """Test project scaffolding with specific provider and model"""
+
+    def test_code_generation_llm(self):
+        """MOST CRITICAL: Test code generation with LLM integration"""
+        if not self.created_project_id or not self.auth_token:
+            self.log_test("Code Generation LLM", False, "- Missing project ID or auth token")
+            return False
+        
+        try:
+            payload = {"provider": "claude", "prompt": "Create a simple homepage"}
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.auth_token}"
+            }
+            
+            print(f"    🔄 Calling LLM generation (may take 10-30 seconds)...")
+            response = requests.post(
+                f"{self.base_url}/projects/{self.created_project_id}/generate",
+                json=payload,
+                headers=headers,
+                timeout=60  # Extended timeout for LLM calls
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                mode = data.get("mode")
+                files = data.get("files", [])
+                html_preview = data.get("html_preview", "")
+                error = data.get("error")
+                
+                # Check if it's using AI mode instead of STUB mode
+                if mode == "ai":
+                    if len(files) > 0 and html_preview:
+                        # Verify it's not just stub content
+                        is_stub = "Auto-generated preview" in html_preview and "Refine via chat" in html_preview
+                        if not is_stub:
+                            self.log_test("Code Generation LLM", True, 
+                                        f"- AI mode successful, {len(files)} files generated, real LLM content")
+                            return True
+                        else:
+                            self.log_test("Code Generation LLM", False, 
+                                        f"- AI mode but still returning stub content")
+                    else:
+                        self.log_test("Code Generation LLM", False, 
+                                    f"- AI mode but missing files ({len(files)}) or html_preview")
+                elif mode == "stub":
+                    self.log_test("Code Generation LLM", False, 
+                                f"- Falling back to STUB mode, LLM integration not working. Error: {error}")
+                else:
+                    self.log_test("Code Generation LLM", False, 
+                                f"- Unknown mode: {mode}")
+            else:
+                self.log_test("Code Generation LLM", False, 
+                            f"- Status: {response.status_code}, Body: {response.text}")
+        except Exception as e:
+            self.log_test("Code Generation LLM", False, f"- Error: {str(e)}")
+        return False
+
+    def test_scaffold_project(self):
         if not self.created_project_id:
             self.log_test("Scaffold Project", False, "- No project ID available")
             return False
