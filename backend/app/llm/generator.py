@@ -51,7 +51,6 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         
         # Extract content - response should be a string
         content = str(response).strip()
-        print(f"DEBUG: Raw LLM response: {repr(content)}")
         
         if not content:
             raise RuntimeError("LLM returned empty response")
