@@ -123,7 +123,7 @@
 ## frontend:
   - task: "Chat-first Home and Project Builder layout"
     implemented: true
-    working: false
+    working: true
     file: "frontend/src/features/builder/ChatHome.jsx, frontend/src/features/builder/ProjectBuilder.jsx"
     stuck_count: 2
     priority: "high"
@@ -144,6 +144,9 @@
         -working: false
         -agent: "testing"
         -comment: "❌ CRITICAL AUTHENTICATION FAILURE: Re-run testing revealed authentication system is fundamentally broken. 1) Auth Banner Missing: Send button is NOT disabled for unauthenticated users (should be disabled), no clear inline banner appears in Agent tab. 2) Registration Fails: Registration appears to complete but fails silently - user email never appears in header, tokens not stored. 3) Generate Flow Broken: POST /chat and /generate requests made but generate returns non-200 due to 'Missing token' error. 4) File Selection Untestable: Code tab shows 'Missing token' and 'No files yet' - cannot test file selection. 5) Project Switching: ✅ Works correctly. Core issue: Users can interact with UI but all backend operations fail with authentication errors."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE REVIEW REQUEST TEST PASSED: Successfully tested the specific Home → create → project preview flow as requested. 1) Home Page: ✅ Loaded correctly with WΞBMΛTIC.dev branding, textarea and Start Building button visible. 2) Authentication: ✅ Registration flow working perfectly - testuser864622@example.com registered successfully, email appears in header, tokens stored and used. 3) Project Creation: ✅ Entered 'Make me a home page concept for webmatic, agentic web builder', project name preview updated correctly, Start Building button navigated to /project/2bf6c8ed-0cf2-46c4-8107-cfd9baea88ed. 4) API Calls: ✅ All expected API calls made - POST /api/projects (create), POST /api/projects/:id/chat (append user message), POST /api/projects/:id/generate (provider, prompt). 5) Project Builder Layout: ✅ Left panel tabs (Home|Agent|Files) and right panel tabs (Preview|Code) all visible and functional. 6) Content Generation: ✅ Preview iframe shows rendered HTML content, Code tab shows generated files list (1 file: index.html). 7) No Errors: ✅ No error messages in UI, no console errors detected. All core functionality working perfectly as specified in review request."
   - task: "Show run quality score in Runs table"
     implemented: true
     working: true
