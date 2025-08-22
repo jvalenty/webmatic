@@ -58,6 +58,22 @@ async def update_project(project_id: str, payload: ProjectUpdate):
     new_doc = await db.projects.find_one({"_id": project_id})
     return doc_to_project(new_doc)
 
+@router.delete("/projects/{project_id}")
+async def delete_project(project_id: str):
+    # Check if project exists
+    doc = await db.projects.find_one({"_id": project_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Delete the project
+    await db.projects.delete_one({"_id": project_id})
+    
+    # Clean up related data
+    await db.chats.delete_many({"_id": project_id})
+    await db.runs.delete_many({"project_id": project_id})
+    
+    return {"ok": True, "message": f"Project {project_id} deleted successfully"}
+
 @router.get("/projects/{project_id}/runs")
 async def list_runs(project_id: str) -> List[Dict[str, Any]]:
     docs = await db.runs.find({"project_id": project_id}).sort("created_at", -1).to_list(200)
