@@ -44,10 +44,16 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         # Extract content - response should be a string
         content = str(response).strip()
         
-        # Try to extract JSON even if provider adds prose
-        m = re.search(r"\{[\s\S]*\}$", content.strip())
+        # Try to extract JSON even if provider adds prose or markdown code blocks
+        # First try to find JSON in markdown code blocks
+        m = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", content, re.IGNORECASE)
         if m:
-            content = m.group(0)
+            content = m.group(1)
+        else:
+            # Fallback to finding JSON at the end
+            m = re.search(r"\{[\s\S]*\}$", content.strip())
+            if m:
+                content = m.group(0)
         
         data = json.loads(content)
         files = data.get("files", [])
