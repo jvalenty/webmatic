@@ -122,6 +122,17 @@
         -working: true
         -agent: "testing"
         -comment: "✅ CRITICAL LLM INTEGRATION TEST PASSED: All 6 priority tests successful. 1) Health check: ✅ Returns ok:true with DB connection. 2) Auth flow: ✅ Registration and Bearer token authentication working perfectly. 3) Project creation: ✅ Returns proper UUID format. 4) Chat persistence: ✅ POST /api/projects/{id}/chat stores and retrieves messages correctly. 5) **MOST CRITICAL**: Code generation: ✅ POST /api/projects/{id}/generate now successfully calls LLM with 'AI' mode instead of 'STUB' mode. Generated real LLM content with 2-4 files including React-specific elements (useState, onClick, components) when requested. 6) Verification test: ✅ React-specific prompt generated authentic AI content with proper React hooks and components. LLM integration fix is fully successful - system no longer falls back to stub mode."
+  - task: "DELETE Endpoint - Project Deletion Functionality"
+    implemented: true
+    working: true
+    file: "backend/app/projects/router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ DELETE ENDPOINT COMPREHENSIVE TEST PASSED: All 9 tests successful including 3 new DELETE-specific tests. 1) Health check: ✅ API responsive with DB connection. 2) Auth flow: ✅ Registration and Bearer token working. 3) Project creation: ✅ Creates test project for deletion. 4) Chat persistence: ✅ Messages stored correctly. 5) Code generation: ✅ LLM integration working in AI mode. 6) **DELETE SUCCESS**: ✅ DELETE /api/projects/{id} returns {ok: true, message: '...'} and project removed from database - subsequent GET returns 404. 7) **ERROR HANDLING**: ✅ DELETE non-existent project correctly returns 404. 8) **DATA CLEANUP**: ✅ Related chats and runs are properly cleaned up from database after project deletion. All DELETE endpoint functionality working perfectly as specified."
 
 ## frontend:
   - task: "Chat-first Home and Project Builder layout"
