@@ -99,8 +99,8 @@ class WebmaticAPITester:
     def test_create_project(self):
         """Test project creation with UUID ID"""
         payload = {
-            "name": "AI Planning System",
-            "description": "Multi-tenant CRM with authentication, user management, and Stripe payment integration"
+            "name": "Homepage Builder Test",
+            "description": "Create a simple homepage with hero section and features"
         }
         try:
             response = requests.post(
