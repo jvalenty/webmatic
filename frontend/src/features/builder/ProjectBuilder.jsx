@@ -299,7 +299,16 @@ export default function ProjectBuilder() {
                     </TabsList>
 
                     <TabsContent value="preview">
-                      {project?.artifacts?.html_preview ? (
+                      {(() => {
+                        console.log('Preview tab render check:', {
+                          project_exists: !!project,
+                          artifacts_exists: !!project?.artifacts,
+                          html_preview_exists: !!project?.artifacts?.html_preview,
+                          html_preview_length: project?.artifacts?.html_preview?.length || 0,
+                          html_preview_type: typeof project?.artifacts?.html_preview
+                        });
+                        return project?.artifacts?.html_preview;
+                      })() ? (
                         <iframe 
                           title="preview" 
                           className="w-full" 
