@@ -76,17 +76,12 @@ export default function ChatHome() {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('Delete clicked for project:', projectId, projectName);
-    
     if (!window.confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
-      console.log('Delete cancelled by user');
       return;
     }
     
     try {
-      console.log('Attempting to delete project:', projectId);
       await ProjectsAPI.delete(projectId);
-      console.log('Delete successful, updating UI');
       setProjects(prev => prev.filter(p => p.id !== projectId));
       toast.success("Project deleted successfully");
     } catch (error) {
