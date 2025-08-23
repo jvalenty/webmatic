@@ -2,10 +2,14 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import jwt
 from passlib.hash import bcrypt
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from ..core.config import AUTH_SECRET
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
+
+security = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> str:
@@ -34,3 +38,23 @@ def decode_token(token: str) -> Optional[Dict[str, Any]]:
         return jwt.decode(token, AUTH_SECRET, algorithms=[ALGORITHM])
     except Exception:
         return None
+
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
+    """Get current user - requires authentication"""
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    payload = decode_token(credentials.credentials)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    return payload
+
+
+async def get_current_user_optional(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Optional[Dict[str, Any]]:
+    """Get current user - authentication optional, returns None if not authenticated"""
+    if not credentials:
+        return None
+    
+    return decode_token(credentials.credentials)
