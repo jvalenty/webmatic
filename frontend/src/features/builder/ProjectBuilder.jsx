@@ -195,18 +195,28 @@ export default function ProjectBuilder() {
     e.preventDefault();
     e.stopPropagation();
     
-    if (!window.confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
-      return;
-    }
+    // Open custom confirmation dialog instead of window.confirm
+    setDeleteDialog({ open: true, project: { id: projectId, name: projectName } });
+  };
+
+  const confirmDelete = async () => {
+    const { project } = deleteDialog;
+    if (!project) return;
     
     try {
-      await ProjectsAPI.delete(projectId);
-      setProjects(prev => prev.filter(p => p.id !== projectId));
+      await ProjectsAPI.delete(project.id);
+      setProjects(prev => prev.filter(p => p.id !== project.id));
       toast.success("Project deleted successfully");
     } catch (error) {
       console.error('Delete failed:', error);
       toast.error("Failed to delete project");
+    } finally {
+      setDeleteDialog({ open: false, project: null });
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialog({ open: false, project: null });
   };
   const updateProjectName = async (newName) => {
     if (!newName.trim() || !project) return;
