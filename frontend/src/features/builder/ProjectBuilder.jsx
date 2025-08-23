@@ -177,7 +177,24 @@ export default function ProjectBuilder() {
     }
   };
 
-  // Handle project name updates
+  // Delete project
+  const deleteProject = async (e, projectId, projectName) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!window.confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await ProjectsAPI.delete(projectId);
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      toast.success("Project deleted successfully");
+    } catch (error) {
+      console.error('Delete failed:', error);
+      toast.error("Failed to delete project");
+    }
+  };
   const updateProjectName = async (newName) => {
     if (!newName.trim() || !project) return;
     
