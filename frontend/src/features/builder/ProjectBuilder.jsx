@@ -299,22 +299,13 @@ export default function ProjectBuilder() {
                     </TabsList>
 
                     <TabsContent value="preview">
-                      {(() => {
-                        console.log('Preview tab render check:', {
-                          project_exists: !!project,
-                          artifacts_exists: !!project?.artifacts,
-                          html_preview_exists: !!project?.artifacts?.html_preview,
-                          html_preview_length: project?.artifacts?.html_preview?.length || 0,
-                          html_preview_type: typeof project?.artifacts?.html_preview
-                        });
-                        return project?.artifacts?.html_preview;
-                      })() ? (
-                        <div style={{ height: "calc(100vh - 300px)", border: "1px solid red" }}>
+                      {project?.artifacts?.html_preview ? (
+                        <div style={{ height: "calc(100vh - 300px)" }}>
                           <iframe 
                             title="preview" 
                             className="w-full h-full" 
-                            style={{ border: "1px solid blue" }} 
-                            src={`data:text/html;charset=utf-8,${encodeURIComponent('<html><head><title>Test</title></head><body style="background: yellow; padding: 20px;"><h1>Preview is working!</h1><p>This is a test to verify iframe rendering.</p></body></html>')}`}
+                            style={{ border: "0" }} 
+                            src={`data:text/html;charset=utf-8,${encodeURIComponent(project.artifacts.html_preview)}`}
                           />
                         </div>
                       ) : (
