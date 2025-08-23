@@ -309,12 +309,14 @@ export default function ProjectBuilder() {
                         });
                         return project?.artifacts?.html_preview;
                       })() ? (
-                        <iframe 
-                          title="preview" 
-                          className="w-full" 
-                          style={{ height: "calc(100vh - 300px)", border: "0" }} 
-                          srcDoc={project.artifacts.html_preview}
-                        />
+                        <div style={{ height: "calc(100vh - 300px)", border: "1px solid red" }}>
+                          <iframe 
+                            title="preview" 
+                            className="w-full h-full" 
+                            style={{ border: "1px solid blue" }} 
+                            src={`data:text/html;charset=utf-8,${encodeURIComponent(project.artifacts.html_preview)}`}
+                          />
+                        </div>
                       ) : (
                         <div className="h-[calc(100vh-300px)] grid place-items-center text-slate-500">
                           <div>
