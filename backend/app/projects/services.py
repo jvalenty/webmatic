@@ -1,12 +1,24 @@
 from typing import Dict, Any, List, Tuple
 from .models import Project, Plan, Artifacts, ArtifactFile
 from datetime import datetime
-from ..llm.planner import generate_plan_from_llm, stub_generate_plan
+from ..llm.planner import plan_from_llm
+
+def stub_generate_plan(description: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Stub plan generation for fallback"""
+    plan_dict = {
+        "frontend": ["React components", "Responsive design", "State management"],
+        "backend": ["API endpoints", "Authentication", "Database models"],
+        "database": ["User table", "Project table", "Session storage"]
+    }
+    meta = {"mode": "stub", "provider": "stub"}
+    return plan_dict, meta
 
 async def compute_plan(description: str, provider: str = "auto", model: str = None, prompt: str = None) -> Tuple[Plan, Dict[str, Any]]:
     """Generate a plan for the project"""
     try:
-        return await generate_plan_from_llm(description, provider, model, prompt)
+        plan = await plan_from_llm(description, provider, model)
+        meta = {"mode": "ai", "provider": provider}
+        return plan, meta
     except Exception as e:
         # Fallback to stub
         plan_dict, meta = stub_generate_plan(description)
