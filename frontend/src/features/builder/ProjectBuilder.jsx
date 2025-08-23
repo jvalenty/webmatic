@@ -285,7 +285,13 @@ export default function ProjectBuilder() {
 
                     <TabsContent value="preview">
                       {project?.artifacts?.html_preview ? (
-                        <iframe title="preview" className="w-full" style={{ height: "calc(100vh - 300px)", border: "0" }} srcDoc={project.artifacts.html_preview} />
+                        <iframe 
+                          title="preview" 
+                          className="w-full" 
+                          style={{ height: "calc(100vh - 300px)", border: "0" }} 
+                          srcDoc={project.artifacts.html_preview}
+                          sandbox="allow-scripts allow-same-origin allow-forms"
+                        />
                       ) : (
                         <div className="h-[calc(100vh-300px)] grid place-items-center text-slate-500">
                           <div>
