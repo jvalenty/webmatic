@@ -178,8 +178,15 @@ export default function ChatHome() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-32">
                         <DropdownMenuItem 
-                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                          onClick={(e) => onDeleteProject(e, p.id, p.name)}
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                          onClick={(e) => {
+                            console.log('DropdownMenuItem clicked');
+                            onDeleteProject(e, p.id, p.name);
+                          }}
+                          onSelect={(e) => {
+                            console.log('DropdownMenuItem selected');
+                            onDeleteProject(e, p.id, p.name);
+                          }}
                         >
                           Delete
                         </DropdownMenuItem>
