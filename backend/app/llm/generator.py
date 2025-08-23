@@ -85,7 +85,7 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
             content = json_match.strip()
         else:
             raise RuntimeError(f"No JSON found in LLM response: {content[:200]}...")
-        # Try to parse JSON, with fallback handling for malformed responses
+        # Try to parse JSON, with aggressive fallback handling for malformed responses
         try:
             data = json.loads(content)
             files = data.get("files", [])
@@ -94,21 +94,39 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
                 files = []
             return {"files": files, "html_preview": html_preview}
         except json.JSONDecodeError as e:
-            # Try to fix common JSON issues
+            # Aggressive JSON repair for truncated responses
             try:
-                # Remove incomplete strings at the end
+                # Method 1: Try to find the last complete object before truncation
                 lines = content.split('\n')
                 for i in range(len(lines) - 1, -1, -1):
                     test_content = '\n'.join(lines[:i+1])
-                    if test_content.rstrip().endswith('}'):
+                    # Try to close any open strings and objects
+                    if '"' in test_content and not test_content.rstrip().endswith('"'):
+                        test_content = test_content.rstrip() + '"'
+                    if '{' in test_content and not test_content.rstrip().endswith('}'):
+                        test_content = test_content.rstrip() + '}'
+                    try:
                         data = json.loads(test_content)
                         files = data.get("files", [])
                         html_preview = data.get("html_preview", "")
                         if not isinstance(files, list):
                             files = []
                         return {"files": files, "html_preview": html_preview}
-            except:
+                    except:
+                        continue
+                
+                # Method 2: Extract whatever HTML we can find
+                html_match = re.search(r'"html_preview":\s*"([^"]*(?:\\.[^"]*)*)"', content, re.DOTALL)
+                if html_match:
+                    html_content = html_match.group(1).replace('\\"', '"').replace('\\n', '\n')
+                    return {
+                        "files": [{"path": "index.html", "content": html_content}],
+                        "html_preview": html_content
+                    }
+                    
+            except Exception as repair_error:
                 pass
+                
             raise RuntimeError(f"Failed to parse LLM JSON response: {e}")
     except Exception as e:
         raise RuntimeError(f"LLM generation error: {e}")
