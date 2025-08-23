@@ -5,6 +5,10 @@ from .config import MONGO_URL, DB_NAME
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
 
+def init_db_client():
+    """Initialize database client - already done at module level"""
+    pass
+
 def close_db_client():
     try:
         client.close()
