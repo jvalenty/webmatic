@@ -275,14 +275,41 @@ export default function ProjectBuilder() {
                             <div className="text-xs text-slate-500">No projects yet.</div>
                           ) : (
                             projects.map((p) => (
-                              <Link 
-                                key={p.id} 
-                                to={`/project/${p.id}`} 
-                                className="block border border-slate-200 bg-white p-3 hover:shadow-sm transition"
-                              >
-                                <div className="text-xs font-medium line-clamp-1">{p.name}</div>
-                                <div className="text-[10px] text-slate-500 line-clamp-2 mt-1">{p.description}</div>
-                              </Link>
+                              <div key={p.id} className="group relative">
+                                <Link 
+                                  to={`/project/${p.id}`} 
+                                  className="block border border-slate-200 bg-white p-3 hover:shadow-sm transition"
+                                >
+                                  <div className="text-xs font-medium line-clamp-1">{p.name}</div>
+                                  <div className="text-[10px] text-slate-500 line-clamp-2 mt-1">{p.description}</div>
+                                </Link>
+                                
+                                {/* Three-dot menu */}
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-6 w-6 p-0 hover:bg-slate-100"
+                                        onClick={(e) => e.preventDefault()}
+                                      >
+                                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                          <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                        </svg>
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-32">
+                                      <DropdownMenuItem 
+                                        className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                        onClick={(e) => deleteProject(e, p.id, p.name)}
+                                      >
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
                             ))
                           )}
                         </div>
