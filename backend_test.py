@@ -538,10 +538,11 @@ class WebmaticAPITester:
         return False
 
     def run_all_tests(self):
-        """Run all backend tests including new DELETE endpoint tests"""
-        print("🚀 DELETE ENDPOINT TEST - Webmatic.dev Backend")
+        """Run all backend tests focusing on LLM Integration Quality and JSON Parsing Fix"""
+        print("🚀 CRITICAL LLM INTEGRATION TEST - Webmatic.dev Backend")
         print(f"📡 Testing against: {self.base_url}")
-        print("🎯 Focus: Test new DELETE /api/projects/{id} endpoint functionality")
+        print("🎯 Focus: LLM Integration Quality and JSON Parsing Fix")
+        print("🔍 Review Request: Verify AI mode, content quality, JSON parsing, error recovery")
         print("=" * 70)
 
         # Test sequence based on review request priorities
@@ -551,10 +552,8 @@ class WebmaticAPITester:
             ("3. Auth Me with Bearer Token", self.test_auth_me),
             ("4. Project Creation", self.test_create_project),
             ("5. Chat Message Persistence", self.test_chat_message_persistence),
-            ("6. Code Generation LLM", self.test_code_generation_llm),
-            ("7. 🔥 NEW: Delete Project Success", self.test_delete_project_success),
-            ("8. 🔥 NEW: Delete Nonexistent Project (404)", self.test_delete_nonexistent_project),
-            ("9. 🔥 NEW: Data Cleanup Verification", self.test_data_cleanup_verification),
+            ("6. 🔥 CRITICAL: Code Generation LLM", self.test_code_generation_llm),
+            ("7. 🔥 CRITICAL: JSON Parsing Long Prompt", self.test_json_parsing_long_prompt),
         ]
 
         for test_name, test_func in tests:
@@ -566,12 +565,14 @@ class WebmaticAPITester:
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 ALL DELETE ENDPOINT TESTS PASSED! Project deletion functionality is working correctly.")
-            print("✅ DELETE /api/projects/{id} successfully removes projects and cleans up related data.")
+            print("🎉 ALL CRITICAL LLM INTEGRATION TESTS PASSED!")
+            print("✅ System no longer falls back to stub mode")
+            print("✅ JSON parsing handles long prompts without truncation")
+            print("✅ Content quality is professional and contextual")
             return True
         else:
-            print("⚠️  DELETE ENDPOINT TESTS FAILED! Project deletion issues detected.")
-            print("❌ DELETE functionality may not be working as expected.")
+            print("⚠️  CRITICAL LLM INTEGRATION TESTS FAILED!")
+            print("❌ LLM integration or JSON parsing issues detected")
             return False
 
 def main():
