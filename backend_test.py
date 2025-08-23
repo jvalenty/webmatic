@@ -167,19 +167,20 @@ class WebmaticAPITester:
         return False
 
     def test_code_generation_llm(self):
-        """MOST CRITICAL: Test code generation with LLM integration"""
+        """MOST CRITICAL: Test code generation with LLM integration - Review Request Priority Test"""
         if not self.created_project_id or not self.auth_token:
             self.log_test("Code Generation LLM", False, "- Missing project ID or auth token")
             return False
         
         try:
-            payload = {"provider": "claude", "prompt": "Create a simple homepage"}
+            # Use the exact prompt from review request
+            payload = {"provider": "claude", "prompt": "Create a professional homepage for Webmatic.dev with hero section, features, pricing, testimonials"}
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.auth_token}"
             }
             
-            print(f"    🔄 Calling LLM generation (may take 10-30 seconds)...")
+            print(f"    🔄 Calling LLM generation with complex prompt (may take 10-30 seconds)...")
             response = requests.post(
                 f"{self.base_url}/projects/{self.created_project_id}/generate",
                 json=payload,
@@ -194,24 +195,36 @@ class WebmaticAPITester:
                 html_preview = data.get("html_preview", "")
                 error = data.get("error")
                 
+                print(f"    📊 Response: mode={mode}, files={len(files)}, error={error}")
+                
                 # Check if it's using AI mode instead of STUB mode
                 if mode == "ai":
-                    if len(files) > 0 and html_preview:
-                        # Verify it's not just stub content
-                        is_stub = "Auto-generated preview" in html_preview and "Refine via chat" in html_preview
-                        if not is_stub:
-                            self.log_test("Code Generation LLM", True, 
-                                        f"- AI mode successful, {len(files)} files generated, real LLM content")
-                            return True
+                    if error is None:
+                        if len(files) > 0 and html_preview:
+                            # Verify it's not just stub content
+                            is_stub = "Auto-generated preview" in html_preview and "Refine via chat" in html_preview
+                            has_webmatic_context = "Webmatic" in html_preview or "webmatic" in html_preview
+                            
+                            if not is_stub and has_webmatic_context:
+                                self.log_test("Code Generation LLM", True, 
+                                            f"- AI mode successful, {len(files)} files, contextual Webmatic.dev content, no stub fallback")
+                                return True
+                            elif not is_stub:
+                                self.log_test("Code Generation LLM", True, 
+                                            f"- AI mode successful, {len(files)} files, real LLM content (minor: no Webmatic context)")
+                                return True
+                            else:
+                                self.log_test("Code Generation LLM", False, 
+                                            f"- AI mode but still returning stub content: 'Auto-generated preview. Refine via chat on the left.'")
                         else:
                             self.log_test("Code Generation LLM", False, 
-                                        f"- AI mode but still returning stub content")
+                                        f"- AI mode but missing files ({len(files)}) or html_preview")
                     else:
                         self.log_test("Code Generation LLM", False, 
-                                    f"- AI mode but missing files ({len(files)}) or html_preview")
+                                    f"- AI mode but has error: {error}")
                 elif mode == "stub":
                     self.log_test("Code Generation LLM", False, 
-                                f"- Falling back to STUB mode, LLM integration not working. Error: {error}")
+                                f"- CRITICAL: Falling back to STUB mode, LLM integration not working. Error: {error}")
                 else:
                     self.log_test("Code Generation LLM", False, 
                                 f"- Unknown mode: {mode}")
