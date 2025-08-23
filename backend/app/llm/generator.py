@@ -15,11 +15,17 @@ def _build_user_prompt(description: str, chat_text: str) -> str:
     if chat_text.strip():
         base += f"Recent Chat:\n{chat_text.strip()}\n\n"
     base += (
-        "Generate ONLY a simple JSON response with exactly 2 keys:\n"
-        "1. 'files': array with 1 object containing 'path' and 'content'\n"
-        "2. 'html_preview': complete HTML document\n\n"
-        "Keep the HTML simple and concise. Make it modern and responsive.\n"
-        "IMPORTANT: Return ONLY the JSON, no explanations, no markdown blocks, no extra text."
+        "Generate EXACTLY this JSON structure (no extra text):\n"
+        "{\n"
+        '  "files": [{"path": "index.html", "content": "HTML_CONTENT_HERE"}],\n'
+        '  "html_preview": "COMPLETE_HTML_DOCUMENT_HERE"\n'
+        "}\n\n"
+        "CRITICAL REQUIREMENTS:\n"
+        "- Make the HTML professional, modern, and fully functional\n"
+        "- Include proper CSS styling, responsive design\n" 
+        "- Keep HTML concise but feature-complete (under 3000 characters)\n"
+        "- Return ONLY valid JSON, no markdown blocks, no explanations\n"
+        "- Ensure JSON is properly terminated and valid"
     )
     return base
 
