@@ -61,6 +61,21 @@ export default function ProjectBuilder() {
     load();
   }, [id]);
 
+  // Reload project when authentication state changes (to get updated artifacts)
+  useEffect(() => {
+    if (authed && project) {
+      const reloadProject = async () => {
+        try {
+          const p = await ProjectsAPI.get(id);
+          setProject(p);
+          // If we now have artifacts, switch to preview
+          if (p?.artifacts?.html_preview) setRightTab("preview");
+        } catch (e) { console.error(e); }
+      };
+      reloadProject();
+    }
+  }, [authed, id]); // Reload when auth state or project id changes
+
   // Load projects for Home tab
   useEffect(() => {
     const loadList = async () => {
