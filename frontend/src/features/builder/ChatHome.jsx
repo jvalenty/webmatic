@@ -34,6 +34,9 @@ export default function ChatHome() {
   const [authed, setAuthed] = useState(false);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Delete confirmation dialog state
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, project: null });
   const [prompt, setPrompt] = useState("");
   const [provider, setProvider] = useState("claude");
   const [creating, setCreating] = useState(false);
