@@ -336,7 +336,83 @@ class WebmaticAPITester:
             self.log_test("Compare Providers", False, f"- Error: {str(e)}")
         return False
 
-    def test_delete_project_success(self):
+    def test_json_parsing_long_prompt(self):
+        """Test JSON parsing with long, detailed prompts that previously caused truncation"""
+        if not self.created_project_id or not self.auth_token:
+            self.log_test("JSON Parsing Long Prompt", False, "- Missing project ID or auth token")
+            return False
+        
+        try:
+            # Long, detailed prompt that could cause JSON truncation issues
+            long_prompt = """Create a comprehensive business website for a modern tech startup called 'InnovateTech Solutions' with the following requirements:
+            
+            1. Hero Section: Eye-catching headline about AI-powered business automation, compelling subheadline explaining value proposition, prominent call-to-action button, background with modern gradient or tech imagery
+            
+            2. Features Section: At least 4 key features with icons - AI Analytics, Cloud Integration, Real-time Monitoring, Custom Dashboards. Each feature should have detailed descriptions
+            
+            3. Services Section: List of services including Consulting, Implementation, Support, Training with pricing tiers
+            
+            4. About Section: Company story, mission statement, team information with placeholder team member cards
+            
+            5. Testimonials: At least 3 customer testimonials with names, companies, and detailed feedback
+            
+            6. Contact Section: Contact form with fields for name, email, company, message, plus company address and social media links
+            
+            7. Footer: Links to privacy policy, terms of service, social media, newsletter signup
+            
+            Make it responsive, modern, and professional with clean typography and consistent color scheme."""
+            
+            payload = {"provider": "claude", "prompt": long_prompt}
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.auth_token}"
+            }
+            
+            print(f"    🔄 Testing JSON parsing with long prompt ({len(long_prompt)} chars)...")
+            response = requests.post(
+                f"{self.base_url}/projects/{self.created_project_id}/generate",
+                json=payload,
+                headers=headers,
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()  # This will fail if JSON is malformed
+                    mode = data.get("mode")
+                    files = data.get("files", [])
+                    html_preview = data.get("html_preview", "")
+                    error = data.get("error")
+                    
+                    if mode == "ai" and error is None:
+                        # Check for comprehensive content based on the detailed prompt
+                        has_multiple_sections = len(html_preview) > 2000  # Should be substantial content
+                        has_innovatetech = "InnovateTech" in html_preview or "innovatetech" in html_preview.lower()
+                        
+                        if has_multiple_sections and has_innovatetech:
+                            self.log_test("JSON Parsing Long Prompt", True, 
+                                        f"- JSON parsed successfully, {len(files)} files, {len(html_preview)} chars content, contextual")
+                            return True
+                        elif has_multiple_sections:
+                            self.log_test("JSON Parsing Long Prompt", True, 
+                                        f"- JSON parsed successfully, {len(files)} files, {len(html_preview)} chars content")
+                            return True
+                        else:
+                            self.log_test("JSON Parsing Long Prompt", False, 
+                                        f"- JSON parsed but content too short ({len(html_preview)} chars) for detailed prompt")
+                    else:
+                        self.log_test("JSON Parsing Long Prompt", False, 
+                                    f"- JSON parsed but mode={mode}, error={error}")
+                        
+                except json.JSONDecodeError as je:
+                    self.log_test("JSON Parsing Long Prompt", False, 
+                                f"- JSON parsing failed: {str(je)}")
+            else:
+                self.log_test("JSON Parsing Long Prompt", False, 
+                            f"- Status: {response.status_code}, Body: {response.text[:200]}...")
+        except Exception as e:
+            self.log_test("JSON Parsing Long Prompt", False, f"- Error: {str(e)}")
+        return False
         """Test DELETE /api/projects/{id} - successful deletion"""
         if not self.created_project_id:
             self.log_test("Delete Project Success", False, "- No project ID available")
