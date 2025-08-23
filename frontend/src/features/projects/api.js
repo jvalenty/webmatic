@@ -41,17 +41,33 @@ export const ProjectsAPI = {
   },
 };
 
-export const BuilderAPI = {
+export const ChatAPI = {
   async getChat(id) {
     const { data } = await api.get(`/projects/${id}/chat`);
     return data;
   },
-  async appendChat(id, message) {
-    const { data } = await api.post(`/projects/${id}/chat`, message);
+  async appendMessage(id, content, role = "user") {
+    const { data } = await api.post(`/projects/${id}/chat`, { content, role });
     return data;
-  },
+  }
+};
+
+export const GenerateAPI = {
   async generate(id, provider, prompt) {
     const { data } = await api.post(`/projects/${id}/generate`, { provider, prompt });
     return data;
+  }
+};
+
+// Backward compatibility
+export const BuilderAPI = {
+  async getChat(id) {
+    return ChatAPI.getChat(id);
+  },
+  async appendChat(id, message) {
+    return ChatAPI.appendMessage(id, message.content, message.role);
+  },
+  async generate(id, provider, prompt) {
+    return GenerateAPI.generate(id, provider, prompt);
   }
 };
