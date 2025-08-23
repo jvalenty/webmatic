@@ -45,8 +45,8 @@ async def generate_code_from_llm(description: str, chat_messages: List[Dict[str,
         
         # Add parameters for longer responses
         configured_client = configured_client.with_params(
-            max_tokens=4000,  # Increase token limit
-            temperature=0.2
+            max_tokens=3000,  # Slightly reduced to prevent truncation
+            temperature=0.3   # Slightly more creative
         )
         
         # Create user message
