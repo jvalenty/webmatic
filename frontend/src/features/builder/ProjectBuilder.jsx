@@ -314,7 +314,7 @@ export default function ProjectBuilder() {
                             title="preview" 
                             className="w-full h-full" 
                             style={{ border: "1px solid blue" }} 
-                            src={`data:text/html;charset=utf-8,${encodeURIComponent(project.artifacts.html_preview)}`}
+                            src={`data:text/html;charset=utf-8,${encodeURIComponent('<html><head><title>Test</title></head><body style="background: yellow; padding: 20px;"><h1>Preview is working!</h1><p>This is a test to verify iframe rendering.</p></body></html>')}`}
                           />
                         </div>
                       ) : (
