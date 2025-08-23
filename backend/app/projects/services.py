@@ -1,80 +1,50 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict, Any, List, Tuple
+from .models import Project, Plan, Artifacts, ArtifactFile
 from datetime import datetime
-from .models import Plan, Project, Artifacts, ArtifactFile
-from ..llm.planner import plan_from_llm
+from ..llm.planner import generate_plan_from_llm, stub_generate_plan
 
-async def compute_stub_plan(description: str) -> Plan:
-    base_frontend = [
-        "Scaffold React app shell",
-        "Header with brand + project switcher",
-        "Project creation form (name, description)",
-        "Projects table with status and actions",
-        "Detail panel with tabs: Plan, API, DB",
-    ]
-    base_backend = [
-        "FastAPI with /api prefix and CORS",
-        "Projects CRUD (UUID as id, _id in Mongo)",
-        "Scaffold endpoint to produce initial plan",
-        "Pydantic v2 models + validation",
-    ]
-    base_db = [
-        "Mongo collections: projects, runs, logs",
-        "Indexes: projects(_id), projects(status)",
-        "Document schema: id, name, description, plan",
-    ]
-
-    extra = []
-    d = (description or "").lower()
-    if any(k in d for k in ["auth", "login", "users"]):
-        extra.append("Auth module placeholder (JWT/OAuth ready)")
-    if any(k in d for k in ["payment", "stripe", "checkout"]):
-        extra.append("Stripe integration placeholder")
-    if extra:
-        base_backend.extend(extra)
-
-    return Plan(frontend=base_frontend, backend=base_backend, database=base_db)
-
+async def compute_plan(description: str, provider: str = "auto", model: str = None, prompt: str = None) -> Tuple[Plan, Dict[str, Any]]:
+    """Generate a plan for the project"""
+    try:
+        return await generate_plan_from_llm(description, provider, model, prompt)
+    except Exception as e:
+        # Fallback to stub
+        plan_dict, meta = stub_generate_plan(description)
+        plan = Plan(**plan_dict)
+        meta["error"] = str(e)
+        meta["mode"] = "stub"
+        return plan, meta
 
 def doc_to_project(doc: Dict[str, Any]) -> Project:
-    if not doc:
-        raise ValueError("Project not found")
-    pid = doc.get("_id") or doc.get("id")
-    plan = None
-    if doc.get("plan"):
-        plan_dict = doc["plan"]
-        plan = Plan(
-            frontend=plan_dict.get("frontend", []),
-            backend=plan_dict.get("backend", []),
-            database=plan_dict.get("database", []),
-        )
-    artifacts = None
-    if doc.get("artifacts"):
-        a = doc["artifacts"] or {}
-        files = [ArtifactFile(path=f.get("path", ""), content=f.get("content", "")) for f in (a.get("files") or [])]
-        artifacts = Artifacts(files=files, html_preview=a.get("html_preview"), mode=a.get("mode"))
-    return Project(
-        id=str(pid),
-        name=doc.get("name", "Unnamed"),
-        description=doc.get("description", ""),
-        status=doc.get("status", "created"),
-        plan=plan,
-        artifacts=artifacts,
-        created_at=doc.get("created_at", datetime.utcnow()),
-        updated_at=doc.get("updated_at", datetime.utcnow()),
-    )
+    """Convert MongoDB document to Project model"""
+    # Handle _id -> id conversion
+    if "_id" in doc:
+        doc["id"] = doc.pop("_id")
+    
+    # Ensure artifacts is properly structured
+    if "artifacts" in doc and doc["artifacts"]:
+        artifacts_dict = doc["artifacts"]
+        # Convert files to proper structure if needed
+        if "files" in artifacts_dict and isinstance(artifacts_dict["files"], list):
+            files = []
+            for f in artifacts_dict["files"]:
+                if isinstance(f, dict) and "path" in f and "content" in f:
+                    files.append(ArtifactFile(**f))
+                else:
+                    # Handle malformed file objects
+                    files.append(ArtifactFile(path=str(f.get("path", "unknown")), content=str(f.get("content", ""))))
+            artifacts_dict["files"] = files
+        
+        doc["artifacts"] = Artifacts(**artifacts_dict)
+    
+    # Handle plan structure
+    if "plan" in doc and doc["plan"]:
+        doc["plan"] = Plan(**doc["plan"])
+    
+    return Project(**doc)
 
-
-async def compute_plan(description: str, provider: Optional[str], model: Optional[str], prompt: Optional[str] = None) -> Tuple[Plan, Dict[str, Any]]:
-    """Return (plan, meta) where meta includes mode: ai|stub, provider, model, error (optional)."""
-    try:
-        base_text = description
-        if prompt and prompt.strip():
-            base_text = f"{description}\nUser refinement: {prompt.strip()}"
-        plan = await plan_from_llm(base_text, provider, model)
-        return plan, {"mode": "ai", "provider": (provider or "auto"), "model": model}
-    except Exception as e:
-        base_text = description
-        if prompt and prompt.strip():
-            base_text = f"{description}\nUser refinement: {prompt.strip()}"
-        plan = await compute_stub_plan(base_text)
-        return plan, {"mode": "stub", "provider": (provider or "auto"), "model": model, "error": str(e)}
+def project_to_doc(project: Project) -> Dict[str, Any]:
+    """Convert Project model to MongoDB document"""
+    doc = project.dict()
+    doc["_id"] = doc.pop("id")  # Convert id -> _id for MongoDB
+    return doc

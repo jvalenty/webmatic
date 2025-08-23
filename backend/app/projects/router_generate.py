@@ -1,105 +1,84 @@
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, HTTPException, Depends
+from typing import Optional, Dict, Any
 from datetime import datetime
+from pydantic import BaseModel
 import uuid
+from ..auth.utils import get_current_user  # Requires auth
 from ..core.db import db
-from .models import Project
-from .services import doc_to_project
 from ..llm.generator import generate_code_from_llm, stub_generate_code
-from ..auth.utils import decode_token
+from .services import doc_to_project
 
 router = APIRouter()
 
-class ChatMessage(BaseModel):
-    role: str
-    content: str
-
 class GenerateRequest(BaseModel):
-    provider: Optional[str] = "claude"
-    prompt: Optional[str] = None
-
-@router.get("/projects/{project_id}/chat")
-async def get_chat(project_id: str) -> Dict[str, Any]:
-    doc = await db.projects.find_one({"_id": project_id})
-    if not doc:
-        raise HTTPException(status_code=404, detail="Project not found")
-    chat_doc = await db.chats.find_one({"_id": project_id})
-    return {"messages": chat_doc.get("messages", []) if chat_doc else []}
-
-@router.post("/projects/{project_id}/chat")
-async def append_chat(project_id: str, msg: ChatMessage):
-    doc = await db.projects.find_one({"_id": project_id})
-    if not doc:
-        raise HTTPException(status_code=404, detail="Project not found")
-    await db.chats.update_one(
-        {"_id": project_id},
-        {"$push": {"messages": {"role": msg.role, "content": msg.content, "ts": datetime.utcnow()}}},
-        upsert=True,
-    )
-    return {"ok": True}
+    provider: str = "claude"  # "claude" | "gpt"
+    prompt: str
 
 @router.post("/projects/{project_id}/generate")
-async def generate_project_output(project_id: str, request: Request, payload: GenerateRequest):
-    # Require auth
-    auth = request.headers.get("authorization") or request.headers.get("Authorization")
-    if not auth or not auth.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Missing token")
-    token = auth.split(" ", 1)[1]
-    user = decode_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    doc = await db.projects.find_one({"_id": project_id})
-    if not doc:
+async def generate_code(
+    project_id: str,
+    request: GenerateRequest,
+    current_user: dict = Depends(get_current_user)  # Auth required
+):
+    """Generate code and preview for a project - requires authentication"""
+    
+    # Get project
+    project_doc = await db.projects.find_one({"_id": project_id})
+    if not project_doc:
         raise HTTPException(status_code=404, detail="Project not found")
-
-    # load chat messages
+    
+    project = doc_to_project(project_doc)
+    
+    # Get chat history for context
     chat_doc = await db.chats.find_one({"_id": project_id})
     messages = chat_doc.get("messages", []) if chat_doc else []
-    # Append the latest user prompt into chat if provided
-    if payload.prompt and payload.prompt.strip():
-        messages.append({"role": "user", "content": payload.prompt.strip(), "ts": datetime.utcnow()})
-        await db.chats.update_one(
-            {"_id": project_id},
-            {"$push": {"messages": {"role": "user", "content": payload.prompt.strip(), "ts": datetime.utcnow()}}},
-            upsert=True,
-        )
-
-    prj = doc_to_project(doc)
-
+    
     # Try LLM, fallback to stub
     mode = "ai"
     error = None
     try:
-        out = await generate_code_from_llm(prj.description, messages, payload.provider)
+        out = await generate_code_from_llm(project.description, messages, request.provider)
         mode = "ai"
     except Exception as e:
-        out = stub_generate_code(prj.description, messages)
+        out = stub_generate_code(project.description, messages)
         mode = "stub"
         error = str(e)
-
-    files = out.get("files", [])
-    html_preview = out.get("html_preview", "")
-
-    # Persist artifacts on project doc
+    
+    # Create artifacts object
+    artifacts = {
+        "files": out.get("files", []),
+        "html_preview": out.get("html_preview", ""),
+        "mode": mode,
+        "error": error,
+        "generated_at": datetime.utcnow(),
+        "provider": request.provider,
+        "user_id": current_user.get("sub")
+    }
+    
+    # Update project with artifacts
     await db.projects.update_one(
         {"_id": project_id},
-        {"$set": {"artifacts": {"files": files, "html_preview": html_preview, "mode": mode}, "status": "generated", "updated_at": datetime.utcnow()}},
+        {
+            "$set": {
+                "artifacts": artifacts,
+                "updated_at": datetime.utcnow()
+            }
+        }
     )
-
-    # Record a run
-    run = {
-        "_id": str(uuid.uuid4()),
-        "project_id": project_id,
-        "provider": payload.provider,
-        "model": None,
-        "mode": mode,
-        "status": "success",
-        "artifact_counts": {"files": len(files)},
-        "error": error,
-        "created_at": datetime.utcnow(),
-    }
-    await db.runs.insert_one(run)
-
-    return {"files": files, "html_preview": html_preview, "mode": mode, "error": error}
+    
+    # Add assistant response to chat
+    if mode == "ai" and out.get("files"):
+        assistant_message = {
+            "role": "assistant", 
+            "content": f"Generated {len(out['files'])} file(s) and preview",
+            "timestamp": datetime.utcnow(),
+            "artifacts": artifacts
+        }
+        
+        await db.chats.update_one(
+            {"_id": project_id},
+            {"$push": {"messages": assistant_message}},
+            upsert=True
+        )
+    
+    return artifacts

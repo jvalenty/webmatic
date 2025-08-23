@@ -1,49 +1,69 @@
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import uvicorn
+import os
 import logging
-from app.core.config import CORS_ORIGINS, DB_NAME
-from app.core.db import close_db_client, db
+from app.core.db import init_db_client, close_db_client
+from app.auth.router import router as auth_router
 from app.projects.router import router as projects_router
+from app.projects.router_chat import router as chat_router
 from app.projects.router_generate import router as generate_router
 from app.templates.router import router as templates_router
-from app.auth.router import router as auth_router
 
-# FastAPI app and /api router
-app = FastAPI()
-api_router = APIRouter(prefix="/api")
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("webmatic")
 
-# Health route
-@api_router.get("/health")
-async def health():
-    try:
-        await db.command("ping")
-        return {"ok": True, "db": DB_NAME}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("Starting up...")
+    init_db_client()
+    yield
+    # Shutdown
+    logger.info("Shutting down...")
+    close_db_client()
 
-# Mount feature routers
-api_router.include_router(projects_router)
-api_router.include_router(templates_router)
-api_router.include_router(auth_router)
-api_router.include_router(generate_router)
-
-# Include the /api router
-app.include_router(api_router)
+app = FastAPI(title="Webmatic API", lifespan=lifespan)
 
 # CORS
-_origins = CORS_ORIGINS
-_allow_credentials = False if any(o.strip() == "*" for o in _origins) else True
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=_allow_credentials,
-    allow_origins=_origins,
+    allow_origins=["*"],  # In production, specify exact origins
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("webmatic")
+# API Router
+api_router = APIRouter(prefix="/api")
+
+# Include routers
+api_router.include_router(auth_router, tags=["auth"])
+api_router.include_router(projects_router, tags=["projects"])
+api_router.include_router(chat_router, tags=["chat"])
+api_router.include_router(generate_router, tags=["generate"])
+api_router.include_router(templates_router, tags=["templates"])
+
+app.include_router(api_router)
+
+@app.get("/api/health")
+async def health():
+    return {"ok": True, "db": "test_database"}
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "server:app",
+        host="0.0.0.0",
+        port=8001,
+        reload=True,
+        log_level="info"
+    )
+
+@app.on_event("startup")
+async def startup_db_client():
+    init_db_client()
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
