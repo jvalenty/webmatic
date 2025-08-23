@@ -145,7 +145,7 @@ class WebmaticAPITester:
             )
             if response.status_code == 200:
                 data = response.json()
-                if data.get("ok") is True:
+                if data.get("success") is True and "message" in data:
                     # Verify message was persisted by retrieving chat
                     get_response = requests.get(f"{self.base_url}/projects/{self.created_project_id}/chat", timeout=10)
                     if get_response.status_code == 200:
