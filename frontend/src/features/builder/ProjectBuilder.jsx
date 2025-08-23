@@ -438,10 +438,10 @@ export default function ProjectBuilder() {
                 </div>
 
                 {/* Tab Content */}
-                <div className="flex-1">
-                  <Tabs value={rightTab} onValueChange={setRightTab}>
+                <div className="flex-1 min-h-0">
+                  <Tabs value={rightTab} onValueChange={setRightTab} className="h-full">
                     {/* Preview Tab */}
-                    <TabsContent value="preview" className="h-full m-0">
+                    <TabsContent value="preview" className="h-full m-0 data-[state=active]:flex">
                       {project?.artifacts?.html_preview ? (
                         <iframe 
                           title="preview" 
@@ -459,9 +459,9 @@ export default function ProjectBuilder() {
                     </TabsContent>
 
                     {/* Code Tab */}
-                    <TabsContent value="code" className="h-full m-0">
+                    <TabsContent value="code" className="h-full m-0 data-[state=active]:flex">
                       {project?.artifacts?.files?.length ? (
-                        <div className="h-full grid grid-cols-12">
+                        <div className="h-full w-full grid grid-cols-12">
                           <div className="col-span-4 border-r overflow-auto">
                             <ul className="text-xs">
                               {project.artifacts.files.map((file, i) => (
