@@ -175,15 +175,17 @@ export default function ProjectBuilder() {
       
       // 4. Create blob URL for new preview content (HTTPS-compatible)
       if (artifacts.html_preview) {
-        // Clean up previous blob URL
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-        }
-        
         // Create new blob URL
         const blob = new Blob([artifacts.html_preview], { type: 'text/html' });
         const newPreviewUrl = URL.createObjectURL(blob);
-        setPreviewUrl(newPreviewUrl);
+        
+        // Clean up previous URL and set new one using functional update
+        setPreviewUrl(currentUrl => {
+          if (currentUrl) {
+            URL.revokeObjectURL(currentUrl);
+          }
+          return newPreviewUrl;
+        });
       }
       
       // 5. Reload chat to get assistant message
