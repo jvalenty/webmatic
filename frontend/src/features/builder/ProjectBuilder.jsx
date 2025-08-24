@@ -134,6 +134,33 @@ export default function ProjectBuilder() {
     }
   }, [id, loadProject, loadChat, loadProjects]);
 
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL + '/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setAuthed(true);
+          setUser(userData);
+        } else {
+          setAuthed(false);
+          setUser(null);
+        }
+      } catch (e) {
+        setAuthed(false);
+        setUser(null);
+      }
+    };
+    
+    checkAuth();
+  }, []);
+
   // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
