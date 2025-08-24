@@ -505,12 +505,19 @@ export default function ProjectBuilder() {
                   <Tabs value={rightTab} onValueChange={setRightTab} className="h-full">
                     {/* Preview Tab */}
                     <TabsContent value="preview" className="h-full m-0 data-[state=active]:flex">
-                      {project?.artifacts?.html_preview ? (
+                      {previewUrl ? (
                         <iframe 
                           title="preview" 
                           className="w-full h-full border-0" 
-                          src={`data:text/html;charset=utf-8,${encodeURIComponent(project.artifacts.html_preview)}`}
+                          src={previewUrl}
                         />
+                      ) : project?.artifacts?.html_preview ? (
+                        <div className="h-full grid place-items-center text-slate-500">
+                          <div className="text-center">
+                            <div className="text-sm">Loading preview...</div>
+                            <div className="text-xs mt-1">Preparing secure preview</div>
+                          </div>
+                        </div>
                       ) : (
                         <div className="h-full grid place-items-center text-slate-500">
                           <div className="text-center">
