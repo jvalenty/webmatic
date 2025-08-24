@@ -138,9 +138,16 @@ export default function ProjectBuilder() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_BACKEND_URL + '/api/auth/me', {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setAuthed(false);
+          setUser(null);
+          return;
+        }
+        
+        const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           }
         });
         
@@ -151,8 +158,10 @@ export default function ProjectBuilder() {
         } else {
           setAuthed(false);
           setUser(null);
+          localStorage.removeItem('token');
         }
       } catch (e) {
+        console.error('Auth check failed:', e);
         setAuthed(false);
         setUser(null);
       }
