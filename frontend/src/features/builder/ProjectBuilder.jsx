@@ -159,10 +159,23 @@ export default function ProjectBuilder() {
         artifacts: artifacts
       }));
       
-      // 4. Reload chat to get assistant message
+      // 4. Create blob URL for new preview content (HTTPS-compatible)
+      if (artifacts.html_preview) {
+        // Clean up previous blob URL
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+        }
+        
+        // Create new blob URL
+        const blob = new Blob([artifacts.html_preview], { type: 'text/html' });
+        const newPreviewUrl = URL.createObjectURL(blob);
+        setPreviewUrl(newPreviewUrl);
+      }
+      
+      // 5. Reload chat to get assistant message
       await loadChat();
       
-      // 5. Switch to preview if generation succeeded
+      // 6. Switch to preview if generation succeeded
       if (artifacts.mode === "ai" && artifacts.html_preview) {
         setRightTab("preview");
         toast.success("Generated successfully");
