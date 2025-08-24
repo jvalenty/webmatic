@@ -134,6 +134,15 @@ export default function ProjectBuilder() {
     }
   }, [id, loadProject, loadChat, loadProjects]);
 
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   // Send message and generate code
   const sendMessage = async () => {
     if (!msg.trim() || !authed) return;
