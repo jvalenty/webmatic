@@ -66,23 +66,39 @@ export default function ChatHome() {
   const navigate = useNavigate();
 
   const onCreateFromPrompt = async () => {
-    if (!prompt.trim()) { toast("Type what you want to build"); return; }
+    if (!prompt.trim()) { 
+      toast.error("Please describe what you want to build"); 
+      return; 
+    }
+    
     try {
       setCreating(true);
-      const proj = await ProjectsAPI.create({ name: firstWordsName, description: prompt.trim() });
-      // Immediately navigate, then trigger full generation (auth required)
+      
+      // Create project
+      const proj = await ProjectsAPI.create({ 
+        name: firstWordsName, 
+        description: prompt.trim() 
+      });
+      
+      // Add initial user message to chat
+      await BuilderAPI.appendChat(proj.id, { 
+        role: "user", 
+        content: prompt.trim() 
+      });
+      
+      // Navigate to project first
       navigate(`/project/${proj.id}`);
-      try {
-        await BuilderAPI.appendChat(proj.id, { role: "user", content: prompt.trim() });
-        await BuilderAPI.generate(proj.id, provider, prompt.trim());
-        toast.success("Preview generated");
-      } catch (err) {
-        toast.error((err?.response?.data?.detail) || "Generation failed. Please login and try again.");
-      }
+      
+      // Then trigger generation (this should happen in ProjectBuilder after navigation)
+      // Don't do generation here as user might not be authenticated yet
+      toast.success("Project created! Generating your website...");
+      
     } catch (e) {
-      console.error(e);
-      toast.error("Failed to create from prompt");
-    } finally { setCreating(false); }
+      console.error("Project creation failed:", e);
+      toast.error("Failed to create project. Please try again.");
+    } finally { 
+      setCreating(false); 
+    }
   };
 
   const onDeleteProject = async (e, projectId, projectName) => {
