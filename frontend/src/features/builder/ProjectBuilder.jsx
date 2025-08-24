@@ -73,22 +73,27 @@ export default function ProjectBuilder() {
       
       // Create blob URL for preview (HTTPS-compatible)
       if (p?.artifacts?.html_preview) {
-        // Clean up previous blob URL
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-        }
-        
         // Create new blob URL
         const blob = new Blob([p.artifacts.html_preview], { type: 'text/html' });
         const newPreviewUrl = URL.createObjectURL(blob);
-        setPreviewUrl(newPreviewUrl);
+        
+        // Clean up previous URL and set new one
+        setPreviewUrl(currentUrl => {
+          if (currentUrl) {
+            URL.revokeObjectURL(currentUrl);
+          }
+          return newPreviewUrl;
+        });
+        
         setRightTab("preview");
       } else {
         // Clean up blob URL if no preview content
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-          setPreviewUrl(null);
-        }
+        setPreviewUrl(currentUrl => {
+          if (currentUrl) {
+            URL.revokeObjectURL(currentUrl);
+          }
+          return null;
+        });
       }
     } catch (e) {
       console.error("Failed to load project:", e);
@@ -96,7 +101,7 @@ export default function ProjectBuilder() {
     } finally {
       setLoading(false);
     }
-  }, [id, previewUrl]);
+  }, [id]); // Remove previewUrl from dependencies
 
   // Load chat history - independent of project artifacts
   const loadChat = useCallback(async () => {
