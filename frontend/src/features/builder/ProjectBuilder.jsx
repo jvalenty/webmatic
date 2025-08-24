@@ -134,42 +134,6 @@ export default function ProjectBuilder() {
     }
   }, [id, loadProject, loadChat, loadProjects]);
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setAuthed(false);
-          setUser(null);
-          return;
-        }
-        
-        const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          setAuthed(true);
-          setUser(userData);
-        } else {
-          setAuthed(false);
-          setUser(null);
-          localStorage.removeItem('token');
-        }
-      } catch (e) {
-        console.error('Auth check failed:', e);
-        setAuthed(false);
-        setUser(null);
-      }
-    };
-    
-    checkAuth();
-  }, []);
-
   // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
