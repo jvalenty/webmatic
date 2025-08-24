@@ -71,9 +71,24 @@ export default function ProjectBuilder() {
       const p = await ProjectsAPI.get(id);
       setProject(p);
       
-      // Auto-switch to preview if we have artifacts
+      // Create blob URL for preview (HTTPS-compatible)
       if (p?.artifacts?.html_preview) {
+        // Clean up previous blob URL
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+        }
+        
+        // Create new blob URL
+        const blob = new Blob([p.artifacts.html_preview], { type: 'text/html' });
+        const newPreviewUrl = URL.createObjectURL(blob);
+        setPreviewUrl(newPreviewUrl);
         setRightTab("preview");
+      } else {
+        // Clean up blob URL if no preview content
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+          setPreviewUrl(null);
+        }
       }
     } catch (e) {
       console.error("Failed to load project:", e);
@@ -81,7 +96,7 @@ export default function ProjectBuilder() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, previewUrl]);
 
   // Load chat history - independent of project artifacts
   const loadChat = useCallback(async () => {
