@@ -229,7 +229,9 @@
   run_ui: true
 
 ## test_plan:
-  current_focus: []
+  current_focus:
+    - "Enhanced Preview and UX Features"
+    - "Chat-first Home and Project Builder layout"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -275,3 +277,5 @@
     -message: "CRITICAL CROSS-ORIGIN PREVIEW FIX IMPLEMENTED: Replaced blob URL approach with srcDoc attribute to resolve cross-origin iframe preview issue. Added sandbox='allow-scripts allow-same-origin allow-forms' for security, added error handling for iframe failures, removed all blob URL creation/cleanup logic. Need urgent E2E testing to verify fix resolves user's blank preview issue when accessing via app.emergent.sh."
     -agent: "testing"
     -message: "✅ CRITICAL CROSS-ORIGIN PREVIEW FIX VERIFICATION COMPLETED: Comprehensive E2E testing confirms the cross-origin iframe preview fix is fully successful. **CRITICAL FIX VERIFICATION**: 1) **srcDoc Implementation**: ✅ VERIFIED - iframe now uses srcDoc attribute (3509 chars) instead of blob URLs, completely resolving cross-origin restrictions. 2) **Blob URL Removal**: ✅ VERIFIED - No blob URLs detected, src attribute not present (using srcDoc only). 3) **Sandbox Security**: ✅ VERIFIED - Proper sandbox='allow-scripts allow-same-origin allow-forms' implementation. 4) **Full Height Rendering**: ✅ VERIFIED - Iframe dimensions 1399px × 850px (not 124px issue). 5) **Cross-Origin Error Resolution**: ✅ VERIFIED - NO cross-origin blocking errors detected, NO 'Blocked a frame with origin app.emergent.sh' errors. 6) **Content Rendering**: ✅ VERIFIED - Substantial HTML content with proper structure (hero sections, about me, projects showcase visible). 7) **Error Handling**: ✅ VERIFIED - iframe onError handler implemented for failure cases. **COMPREHENSIVE TESTING RESULTS**: All 5 critical fixes verified working perfectly. The user's reported blank preview issue when accessing via app.emergent.sh has been completely resolved by replacing blob URLs with srcDoc approach. Preview functionality now works seamlessly across all domains without cross-origin restrictions."
+    -agent: "main"
+    -message: "COMPREHENSIVE ENHANCEMENTS IMPLEMENTED: 1) Fixed project 404 error handling with home redirect 2) Added persistent panel sizes per project (localStorage) 3) Added preview loading spinner during generation 4) Enhanced assistant success messages with file counts 5) Fixed iframe sandbox configuration (removed allow-same-origin security risk) 6) Enhanced timestamp display with full datetime. Ready for comprehensive frontend testing to verify all improvements work correctly with existing backend system."
