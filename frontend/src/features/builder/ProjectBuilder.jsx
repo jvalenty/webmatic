@@ -158,54 +158,6 @@ export default function ProjectBuilder() {
       loadProjects();
     }
   }, [id, loadProject, loadChat, loadProjects]);
-
-  // Auto-generate on project load if has chat but no artifacts
-  useEffect(() => {
-    const shouldAutoGenerate = async () => {
-      if (project && authed && chat.length > 0 && !project.artifacts?.html_preview) {
-        // Find the last user message
-        const lastUserMessage = chat.filter(m => m.role === "user").pop();
-        if (lastUserMessage) {
-          console.log("Auto-generating for initial project creation");
-          
-          try {
-            setGenerating(true);
-            const artifacts = await GenerateAPI.generate(id, provider, lastUserMessage.content);
-            
-            setProject(prev => ({
-              ...prev,
-              artifacts: artifacts
-            }));
-            
-            // Create blob URL for preview
-            if (artifacts.html_preview) {
-              const blob = new Blob([artifacts.html_preview], { type: 'text/html' });
-              const newPreviewUrl = URL.createObjectURL(blob);
-              
-              setPreviewUrl(currentUrl => {
-                if (currentUrl) {
-                  URL.revokeObjectURL(currentUrl);
-                }
-                return newPreviewUrl;
-              });
-            }
-            
-            await loadChat(); // Reload to get assistant response
-            setRightTab("preview");
-            toast.success("Website generated successfully!");
-            
-          } catch (error) {
-            console.error("Auto-generation failed:", error);
-            toast.error("Generation failed. Please try again.");
-          } finally {
-            setGenerating(false);
-          }
-        }
-      }
-    };
-    
-    shouldAutoGenerate();
-  }, [project, authed, chat, id, provider]); // Trigger when these change
   useEffect(() => {
     return () => {
       if (previewUrl) {
