@@ -68,6 +68,14 @@ export default function ProjectBuilder() {
   const [homePrompt, setHomePrompt] = useState("");
   const [creating, setCreating] = useState(false);
 
+  // Save panel sizes when they change
+  const handlePanelChange = useCallback((sizes) => {
+    setPanelSizes(sizes);
+    if (id) {
+      localStorage.setItem(`panel-sizes-${id}`, JSON.stringify(sizes));
+    }
+  }, [id]);
+
   // Load project data - happens once per project ID change
   const loadProject = useCallback(async () => {
     try {
