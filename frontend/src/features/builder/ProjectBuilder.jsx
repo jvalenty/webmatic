@@ -289,9 +289,9 @@ export default function ProjectBuilder() {
       {/* Main Content */}
       <main className="w-full px-6 py-6">
         <div className="mt-0" style={{ height: "calc(100vh - 180px)" }}>
-          <PanelGroup direction="horizontal">
+          <PanelGroup direction="horizontal" onLayout={handlePanelChange}>
             {/* Left Panel */}
-            <Panel key={id} defaultSize={25} minSize={18} maxSize={50}>
+            <Panel key={id} defaultSize={panelSizes[0]} minSize={18} maxSize={50}>
               <div className="h-full border border-slate-200 bg-white flex flex-col">
                 <div className="px-3 pt-2 border-b">
                   <Tabs defaultValue="agent">
