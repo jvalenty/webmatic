@@ -409,6 +409,8 @@ class WebmaticAPITester:
         except Exception as e:
             self.log_test("JSON Parsing Long Prompt", False, f"- Error: {str(e)}")
         return False
+
+    def test_delete_project_success(self):
         """Test DELETE /api/projects/{id} - successful deletion"""
         if not self.created_project_id:
             self.log_test("Delete Project Success", False, "- No project ID available")
