@@ -114,23 +114,7 @@ export default function ProjectBuilder() {
       loadChat();
       loadProjects();
     }
-  }, [id]); // Only depend on ID to prevent multiple calls
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  // Cleanup blob URLs on unmount
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
+  }, [id]);
   const sendMessage = async () => {
     if (!msg.trim() || !authed) return;
     
