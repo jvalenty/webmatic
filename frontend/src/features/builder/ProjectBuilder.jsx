@@ -194,7 +194,14 @@ export default function ProjectBuilder() {
     };
   }, [previewUrl]);
 
-  // Send message and generate code
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
   const sendMessage = async () => {
     if (!msg.trim() || !authed) return;
     
