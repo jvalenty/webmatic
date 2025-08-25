@@ -49,6 +49,7 @@ export default function ProjectBuilder() {
   const [generating, setGenerating] = useState(false);
   const [rightTab, setRightTab] = useState("preview");
   const [selectedFile, setSelectedFile] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState(null);
   
   // Projects list for Home tab
   const [projects, setProjects] = useState([]);
