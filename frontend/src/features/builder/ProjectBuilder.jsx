@@ -475,16 +475,19 @@ export default function ProjectBuilder() {
                     
                     <div className="flex items-center gap-2 text-xs">
                       {project?.artifacts?.mode && (
-                        <span className={`uppercase tracking-wide px-2 py-1 rounded ${
+                        <span className={`uppercase tracking-wide px-2 py-1 rounded text-[10px] font-medium ${
                           project.artifacts.mode === "ai" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
                         }`}>
                           {project.artifacts.mode}
                         </span>
                       )}
                       {project?.artifacts?.generated_at && (
-                        <span className="text-slate-400">
-                          {new Date(project.artifacts.generated_at).toLocaleTimeString()}
-                        </span>
+                        <div className="text-slate-500">
+                          <span className="text-[10px] uppercase tracking-wide">Generated at </span>
+                          <span className="font-mono">
+                            {new Date(project.artifacts.generated_at).toLocaleString()}
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
