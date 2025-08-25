@@ -523,47 +523,27 @@ export default function ProjectBuilder() {
                   <Tabs value={rightTab} onValueChange={setRightTab} className="h-full">
                     {/* Preview Tab */}
                     <TabsContent value="preview" className="h-full m-0 data-[state=active]:flex">
-                      {(() => {
-                        console.log('DEBUG: Preview render check', {
-                          previewUrl: !!previewUrl,
-                          previewUrlValue: previewUrl,
-                          hasHtmlPreview: !!project?.artifacts?.html_preview,
-                          htmlPreviewLength: project?.artifacts?.html_preview?.length || 0
-                        });
-                        
-                        if (previewUrl) {
-                          return (
-                            <iframe 
-                              title="preview" 
-                              className="w-full h-full border-0" 
-                              src={previewUrl}
-                              onLoad={() => console.log('DEBUG: Iframe loaded successfully')}
-                              onError={() => console.log('DEBUG: Iframe failed to load')}
-                            />
-                          );
-                        } else if (project?.artifacts?.html_preview) {
-                          return (
-                            <div className="h-full grid place-items-center text-slate-500">
-                              <div className="text-center">
-                                <div className="text-sm">Loading preview...</div>
-                                <div className="text-xs mt-1">Preparing secure preview</div>
-                                <div className="text-xs mt-2 text-red-500">
-                                  DEBUG: Has HTML ({project.artifacts.html_preview.length} chars) but no blob URL
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <div className="h-full grid place-items-center text-slate-500">
-                              <div className="text-center">
-                                <div className="text-sm">No preview generated yet</div>
-                                <div className="text-xs mt-1">Use the Agent tab to generate code</div>
-                              </div>
-                            </div>
-                          );
-                        }
-                      })()}
+                      {previewUrl ? (
+                        <iframe 
+                          title="preview" 
+                          className="w-full h-full border-0" 
+                          src={previewUrl}
+                        />
+                      ) : project?.artifacts?.html_preview ? (
+                        <div className="h-full grid place-items-center text-slate-500">
+                          <div className="text-center">
+                            <div className="text-sm">Loading preview...</div>
+                            <div className="text-xs mt-1">Preparing secure preview</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-full grid place-items-center text-slate-500">
+                          <div className="text-center">
+                            <div className="text-sm">No preview generated yet</div>
+                            <div className="text-xs mt-1">Use the Agent tab to generate code</div>
+                          </div>
+                        </div>
+                      )}
                     </TabsContent>
 
                     {/* Code Tab */}
