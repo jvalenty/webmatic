@@ -157,7 +157,7 @@ export default function ProjectBuilder() {
       loadChat();
       loadProjects();
     }
-  }, [id, loadProject, loadChat, loadProjects]);
+  }, [id]); // Only depend on ID to prevent multiple calls
   useEffect(() => {
     return () => {
       if (previewUrl) {
