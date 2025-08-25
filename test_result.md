@@ -233,7 +233,6 @@
 
 ## test_plan:
   current_focus:
-    - "Enhanced Preview and UX Features"
     - "Chat-first Home and Project Builder layout"
   stuck_tasks: []
   test_all: false
