@@ -495,12 +495,22 @@ export default function ProjectBuilder() {
                   <Tabs value={rightTab} onValueChange={setRightTab} className="h-full">
                     {/* Preview Tab */}
                     <TabsContent value="preview" className="h-full m-0 data-[state=active]:flex">
-                      {project?.artifacts?.html_preview ? (
+                      {previewLoading ? (
+                        <div className="h-full grid place-items-center text-slate-500">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto mb-2"></div>
+                            <div className="text-sm">Generating preview...</div>
+                          </div>
+                        </div>
+                      ) : project?.artifacts?.html_preview ? (
                         <iframe 
                           title="preview" 
                           className="w-full h-full border-0" 
                           srcDoc={project.artifacts.html_preview}
-                          sandbox="allow-scripts"
+                          sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                          onLoad={() => {
+                            console.log('Preview iframe loaded successfully');
+                          }}
                           onError={(e) => {
                             console.error('Preview iframe failed to load:', e);
                             toast.error('Preview failed to load. Please refresh the page.');
