@@ -68,35 +68,9 @@ export default function ProjectBuilder() {
       const p = await ProjectsAPI.get(id);
       setProject(p);
       
-      // Create blob URL for preview (HTTPS-compatible)
+      // Auto-switch to preview if we have artifacts
       if (p?.artifacts?.html_preview) {
-        try {
-          // Create new blob URL
-          const blob = new Blob([p.artifacts.html_preview], { type: 'text/html' });
-          const newPreviewUrl = URL.createObjectURL(blob);
-          
-          // Clean up previous URL and set new one
-          setPreviewUrl(currentUrl => {
-            if (currentUrl) {
-              URL.revokeObjectURL(currentUrl);
-            }
-            return newPreviewUrl;
-          });
-          
-          setRightTab("preview");
-          
-        } catch (blobError) {
-          console.error('ERROR: Blob creation failed:', blobError);
-          toast.error('Failed to create preview. Please refresh the page.');
-        }
-      } else {
-        // Clean up blob URL if no preview content
-        setPreviewUrl(currentUrl => {
-          if (currentUrl) {
-            URL.revokeObjectURL(currentUrl);
-          }
-          return null;
-        });
+        setRightTab("preview");
       }
     } catch (e) {
       console.error("Failed to load project:", e);
