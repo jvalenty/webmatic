@@ -150,7 +150,7 @@
     file: "frontend/src/features/builder/ChatHome.jsx, frontend/src/features/builder/ProjectBuilder.jsx"
     stuck_count: 2
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: false
         -agent: "user"
@@ -179,6 +179,20 @@
         -working: true
         -agent: "testing"
         -comment: "✅ CRITICAL CROSS-ORIGIN PREVIEW FIX VERIFICATION COMPLETED: Comprehensive E2E testing confirms the cross-origin iframe preview fix is fully successful. **CRITICAL FIX VERIFICATION**: 1) **srcDoc Implementation**: ✅ VERIFIED - iframe now uses srcDoc attribute (3509 chars) instead of blob URLs, completely resolving cross-origin restrictions. 2) **Blob URL Removal**: ✅ VERIFIED - No blob URLs detected, src attribute not present (using srcDoc only). 3) **Sandbox Security**: ✅ VERIFIED - Proper sandbox='allow-scripts allow-same-origin allow-forms' implementation. 4) **Full Height Rendering**: ✅ VERIFIED - Iframe dimensions 1399px × 850px (not 124px issue). 5) **Cross-Origin Error Resolution**: ✅ VERIFIED - NO cross-origin blocking errors detected, NO 'Blocked a frame with origin app.emergent.sh' errors. 6) **Content Rendering**: ✅ VERIFIED - Substantial HTML content with proper structure (hero sections, about me, projects showcase visible). 7) **Error Handling**: ✅ VERIFIED - iframe onError handler implemented for failure cases. **COMPREHENSIVE TESTING RESULTS**: All 5 critical fixes verified working perfectly. The user's reported blank preview issue when accessing via app.emergent.sh has been completely resolved by replacing blob URLs with srcDoc approach. Preview functionality now works seamlessly across all domains without cross-origin restrictions."
+        -working: true
+        -agent: "main"
+        -comment: "ENHANCEMENT FIXES IMPLEMENTED: 1) Fixed project 404 error handling with redirect to home 2) Added persistent panel size per project (localStorage) 3) Added preview loading state during generation 4) Enhanced assistant messages with file count feedback 5) Improved iframe sandbox to avoid allow-same-origin security issue 6) Added enhanced 'Generated at' timestamp display. Need comprehensive testing to verify all improvements work correctly."
+  - task: "Enhanced Preview and UX Features"
+    implemented: true
+    working: false
+    file: "frontend/src/features/builder/ProjectBuilder.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "main"
+        -comment: "NEW ENHANCEMENT: Implemented persistent panel sizes per project, preview loading state, enhanced assistant messages, better iframe sandbox configuration (removed allow-same-origin), and improved timestamp display. Ready for testing."
   - task: "Cross-Origin Preview Fix - srcDoc Implementation"
     implemented: true
     working: true
