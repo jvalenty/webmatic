@@ -49,6 +49,13 @@ export default function ProjectBuilder() {
   const [generating, setGenerating] = useState(false);
   const [rightTab, setRightTab] = useState("preview");
   const [selectedFile, setSelectedFile] = useState(0);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  
+  // Panel sizes - persisted per project
+  const [panelSizes, setPanelSizes] = useState(() => {
+    const saved = localStorage.getItem(`panel-sizes-${id}`);
+    return saved ? JSON.parse(saved) : [25, 75];
+  });
   
   // Projects list for Home tab
   const [projects, setProjects] = useState([]);
