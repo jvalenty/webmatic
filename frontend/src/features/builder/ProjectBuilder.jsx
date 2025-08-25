@@ -74,11 +74,18 @@ export default function ProjectBuilder() {
       }
     } catch (e) {
       console.error("Failed to load project:", e);
-      toast.error("Failed to load project");
+      
+      // Handle 404 specifically - redirect to home
+      if (e?.response?.status === 404 || e?.status === 404) {
+        toast.error("Project not found. Redirecting to home...");
+        setTimeout(() => navigate('/'), 2000);
+      } else {
+        toast.error("Failed to load project");
+      }
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, navigate]);
 
   // Load chat history - independent of project artifacts
   const loadChat = useCallback(async () => {
