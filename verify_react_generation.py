@@ -9,7 +9,7 @@ from datetime import datetime
 
 def test_react_specific_generation():
     """Test that LLM generates React-specific content with hooks and components"""
-    base_url = "https://webmatic-dev.preview.emergentagent.com/api"
+    base_url = "https://webmatic-builder.preview.emergentagent.com/api"
     
     # Register a test user
     test_email = f"reacttest_{datetime.now().strftime('%Y%m%d_%H%M%S')}@example.com"
