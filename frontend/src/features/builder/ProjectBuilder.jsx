@@ -468,7 +468,7 @@ export default function ProjectBuilder() {
                           title="preview" 
                           className="w-full h-full border-0" 
                           srcDoc={project.artifacts.html_preview}
-                          sandbox="allow-scripts allow-same-origin allow-forms"
+                          sandbox="allow-scripts"
                           onError={(e) => {
                             console.error('Preview iframe failed to load:', e);
                             toast.error('Preview failed to load. Please refresh the page.');
