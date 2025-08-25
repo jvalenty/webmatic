@@ -39,9 +39,6 @@ export default function ProjectBuilder() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Preview blob URL for iframe (HTTPS-compatible)
-  const [previewUrl, setPreviewUrl] = useState(null);
-  
   // Chat state - separate from project artifacts
   const [chat, setChat] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
