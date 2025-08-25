@@ -144,6 +144,7 @@ export default function ProjectBuilder() {
     
     try {
       setGenerating(true);
+      setPreviewLoading(true);
       
       // Add user message to chat immediately for UI responsiveness
       setChat(prev => [...prev, userMessage]);
@@ -164,10 +165,18 @@ export default function ProjectBuilder() {
       // 4. Reload chat to get assistant message
       await loadChat();
       
-      // 5. Switch to preview if generation succeeded
+      // 5. Add success message to chat
+      const filesCount = artifacts.files?.length || 0;
+      const successMessage = {
+        role: "assistant",
+        content: `Generated ${filesCount} file(s) and preview successfully!`
+      };
+      setChat(prev => [...prev, successMessage]);
+      
+      // 6. Switch to preview if generation succeeded
       if (artifacts.mode === "ai" && artifacts.html_preview) {
         setRightTab("preview");
-        toast.success("Generated successfully");
+        toast.success(`Generated ${filesCount} file(s) successfully`);
       } else if (artifacts.mode === "stub") {
         toast.warning(`Generated with fallback: ${artifacts.error || "LLM unavailable"}`);
       }
@@ -181,6 +190,7 @@ export default function ProjectBuilder() {
       setChat(prev => prev.slice(0, -1));
     } finally {
       setGenerating(false);
+      setPreviewLoading(false);
     }
   };
 
