@@ -71,22 +71,42 @@ export default function ProjectBuilder() {
       const p = await ProjectsAPI.get(id);
       setProject(p);
       
+      console.log('DEBUG: Project loaded', {
+        hasArtifacts: !!p?.artifacts,
+        hasHtmlPreview: !!p?.artifacts?.html_preview,
+        htmlPreviewLength: p?.artifacts?.html_preview?.length || 0,
+        mode: p?.artifacts?.mode
+      });
+      
       // Create blob URL for preview (HTTPS-compatible)
       if (p?.artifacts?.html_preview) {
-        // Create new blob URL
-        const blob = new Blob([p.artifacts.html_preview], { type: 'text/html' });
-        const newPreviewUrl = URL.createObjectURL(blob);
-        
-        // Clean up previous URL and set new one
-        setPreviewUrl(currentUrl => {
-          if (currentUrl) {
-            URL.revokeObjectURL(currentUrl);
-          }
-          return newPreviewUrl;
-        });
-        
-        setRightTab("preview");
+        try {
+          console.log('DEBUG: Creating blob URL for preview');
+          
+          // Create new blob URL
+          const blob = new Blob([p.artifacts.html_preview], { type: 'text/html' });
+          const newPreviewUrl = URL.createObjectURL(blob);
+          
+          console.log('DEBUG: Blob URL created:', newPreviewUrl);
+          
+          // Clean up previous URL and set new one
+          setPreviewUrl(currentUrl => {
+            console.log('DEBUG: Setting previewUrl', { old: currentUrl, new: newPreviewUrl });
+            if (currentUrl) {
+              URL.revokeObjectURL(currentUrl);
+            }
+            return newPreviewUrl;
+          });
+          
+          setRightTab("preview");
+          console.log('DEBUG: Preview tab activated');
+          
+        } catch (blobError) {
+          console.error('ERROR: Blob creation failed:', blobError);
+          toast.error('Failed to create preview. Please refresh the page.');
+        }
       } else {
+        console.log('DEBUG: No html_preview content, clearing previewUrl');
         // Clean up blob URL if no preview content
         setPreviewUrl(currentUrl => {
           if (currentUrl) {
