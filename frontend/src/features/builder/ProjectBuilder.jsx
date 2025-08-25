@@ -461,7 +461,7 @@ export default function ProjectBuilder() {
             <PanelResizeHandle className="w-1 bg-slate-200 hover:bg-slate-300 cursor-col-resize" />
 
             {/* Right Panel */}
-            <Panel minSize={40} defaultSize={75}>
+            <Panel minSize={40} defaultSize={panelSizes[1]}>
               <div className="h-full border border-slate-200 bg-white flex flex-col">
                 {/* Tab Header */}
                 <div className="px-4 pt-2 border-b">
